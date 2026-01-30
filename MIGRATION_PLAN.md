@@ -1,4 +1,4 @@
-# AM-CFD Fortran to Jax/Taichi Migration Plan
+# AM-CFD Fortran Migration Plan
 
 ## Code Overview
 **Purpose:** Powder Bed Fusion CFD simulation (Additive Manufacturing)  
@@ -11,9 +11,51 @@
 
 ---
 
-## Migration Steps
+## Code Architecture Principles
 
-> Replace `[LANG]` with `Jax` or `Taichi`. Replace `[STRUCTURE]` with the agreed modular structure.
+1. **Pure Functions**: All functions should be side-effect free. Inputs are read-only; return new objects instead of modifying in-place.
+
+2. **State Bundling**: Group related variables into containers. This replaces Fortran's `common` blocks and global arrays.
+
+3. **Function Signature Pattern**: All computational functions follow `(immutable_state, params) → new_state`
+
+4. **Explicit Updates**: Create new state objects with modified fields rather than in-place mutation.
+
+### Language-Specific Implementations
+
+See the implementation file for your target language:
+- **JAX**: [`jax_implementation.py`](./jax_implementation.py)
+- **Taichi**: [`taichi_implementation.py`](./taichi_implementation.py) *(to be created)*
+
+These files contain:
+- State container definitions (data structures)
+- File organization and module layout
+- Variable lifetime categories
+- Function patterns and JIT/compilation strategy
+
+### Variable Lifetime Categories
+
+| Category | Examples | Description |
+|----------|----------|-------------|
+| **Persistent** | `uVel, enthalpy, temp` | Updated every timestep |
+| **Grid** | `x, y, z, vol` | Immutable after initialization |
+| **Transient coefficients** | `ap, ae, su, sp` | Rebuilt each solver call |
+| **Previous timestep** | `unot, hnot` | Saved at start of timestep |
+| **Derived on-demand** | `fracl, vis` | Computed as needed |
+
+### Fortran Pattern Mapping
+
+| Fortran Pattern | Target Equivalent |
+|-----------------|-------------------|
+| `common /block/ u,v,w` | State container/struct |
+| `u(i,j,k) = ...` (in-place) | Return new array |
+| Subroutine with `intent(inout)` | Pure function returning new state |
+| `EQUIVALENCE(phi, uVel)` | Explicit field access |
+| `allocate(u(ni,nj,nk))` | Array initialization in container |
+
+---
+
+## Migration Steps
 
 ---
 
