@@ -83,3 +83,21 @@ boundary_conditions:
   tempBottom: 293
   tempPreheat: 293
   tempAmb: 293
+
+# Constant
+Constant:
+  g: 9.8
+  pi: 3.1415926
+  sigm: 5.67e-8
+  great: 1.0e20
+  small: 1.0e-06
+  nx: 1200
+  ny: 1200
+  nz: 180
+  nvar: 4
+  nx1: 7
+  ny1: 7
+  nz1: 7
+  ng: 5
+  TOOLLINES: 1000
+  COORDLINES: 5000
