@@ -87,6 +87,8 @@ subroutine Cust_Out
 	integer outputnum
 	integer outputintervel
 	character( len = 3 ) :: cTemp
+	integer :: npts
+	real(kind=4) :: val4
 
 
 	outputintervel=5               ! reserve transient datas every XX time steps
@@ -95,8 +97,8 @@ subroutine Cust_Out
 
 	outputnum=INT(timet/delt)/outputintervel
 	write( cTemp,'(i3)' ) outputnum
-	open(unit=41,file='./result/tecmov' //trim(adjustl( cTemp ))// '.tec')
-	write(41,*)'VARIABLES = "X", "Y", "Z", "U", "V", "W","T","vis","diff","den","solidID"'
+	! Open file for ASCII header
+	open(unit=41,file='./result/vtkmov' //trim(adjustl( cTemp ))// '.vtk')
 
 
 	gridx=0
@@ -105,25 +107,57 @@ subroutine Cust_Out
 
 
 	do i=2,nim1
-
 		gridx=gridx+1
 	enddo
 
 	do j=2,njm1
-
-			gridy=gridy+1
+		gridy=gridy+1
 	enddo
 
 	do k=2,nkm1
-
-			gridz=gridz+1
+		gridz=gridz+1
 	enddo
 	
+	
+	npts = gridx * gridy * gridz
 
-
-	write(41,410)timet, gridx, gridy, gridz
-
-	410	format('ZONE T = "XYZ ', F7.5,'" I=',I4,' J=',I4,' K=', I4,' F=POINT')
+	! Write VTK legacy format header (ASCII)
+	write(41,'(A)') '# vtk DataFile Version 3.0'
+	write(41,'(A)') 'AMCFD Simulation Output'
+	write(41,'(A)') 'BINARY'
+	write(41,'(A)') 'DATASET STRUCTURED_GRID'
+	write(41,'(A,I0,A,I0,A,I0)') 'DIMENSIONS ', gridx, ' ', gridy, ' ', gridz
+	write(41,'(A,I0,A)') 'POINTS ', npts, ' float'
+	close(41)
+	
+	! Reopen for binary append to write coordinates
+	open(unit=41,file='./result/vtkmov' //trim(adjustl( cTemp ))// '.vtk', &
+	     access='stream', form='unformatted', position='append', convert='big_endian')
+	
+	! Write point coordinates in binary
+	do k=2,nkm1
+	do j=2,njm1
+	do i=2,nim1
+		val4 = real(x(i), 4)
+		write(41) val4
+		val4 = real(y(j), 4)
+		write(41) val4
+		val4 = real(z(k), 4)
+		write(41) val4
+	enddo
+	enddo
+	enddo
+	
+	! Write POINT_DATA header (need to reopen as formatted to write ASCII)
+	close(41)
+	open(unit=41,file='./result/vtkmov' //trim(adjustl( cTemp ))// '.vtk', &
+	     position='append')
+	write(41,'(A,I0)') 'POINT_DATA ', npts
+	close(41)
+	
+	! Reopen for binary append for field data
+	open(unit=41,file='./result/vtkmov' //trim(adjustl( cTemp ))// '.vtk', &
+	     access='stream', form='unformatted', position='append', convert='big_endian')
 
 
 
@@ -183,16 +217,72 @@ subroutine Cust_Out
 	enddo
 
 	
+	! Write Velocity vector (U, V, W) in binary - VTK requires newline before field name
+	write(41) char(10), 'VECTORS Velocity float', char(10)
 	do k=2,nkm1
 	do j=2,njm1
 	do i=2,nim1
-		
-
+		val4 = real(auvl(i,j,k), 4)
+		write(41) val4
+		val4 = real(avvl(i,j,k), 4)
+		write(41) val4
+		val4 = real(awvl(i,j,k), 4)
+		write(41) val4
+	enddo
+	enddo
+	enddo
 	
-		write(41,111) x(i),y(j),z(k),auvl(i,j,k),avvl(i,j,k),awvl(i,j,k),temp(i,j,k),vis(i,j,k),diff(i,j,k),den(i,j,k),solidfield(i,j,k)
-					
-111	format(11(es14.4))
-
+	! Temperature (T)
+	write(41) char(10), 'SCALARS T float 1', char(10), 'LOOKUP_TABLE default', char(10)
+	do k=2,nkm1
+	do j=2,njm1
+	do i=2,nim1
+		val4 = real(temp(i,j,k), 4)
+		write(41) val4
+	enddo
+	enddo
+	enddo
+	
+	! Viscosity (vis)
+	write(41) char(10), 'SCALARS vis float 1', char(10), 'LOOKUP_TABLE default', char(10)
+	do k=2,nkm1
+	do j=2,njm1
+	do i=2,nim1
+		val4 = real(vis(i,j,k), 4)
+		write(41) val4
+	enddo
+	enddo
+	enddo
+	
+	! Diffusivity (diff)
+	write(41) char(10), 'SCALARS diff float 1', char(10), 'LOOKUP_TABLE default', char(10)
+	do k=2,nkm1
+	do j=2,njm1
+	do i=2,nim1
+		val4 = real(diff(i,j,k), 4)
+		write(41) val4
+	enddo
+	enddo
+	enddo
+	
+	! Density (den)
+	write(41) char(10), 'SCALARS den float 1', char(10), 'LOOKUP_TABLE default', char(10)
+	do k=2,nkm1
+	do j=2,njm1
+	do i=2,nim1
+		val4 = real(den(i,j,k), 4)
+		write(41) val4
+	enddo
+	enddo
+	enddo
+	
+	! SolidID
+	write(41) char(10), 'SCALARS solidID float 1', char(10), 'LOOKUP_TABLE default', char(10)
+	do k=2,nkm1
+	do j=2,njm1
+	do i=2,nim1
+		val4 = real(solidfield(i,j,k), 4)
+		write(41) val4
 	enddo
 	enddo
 	enddo
