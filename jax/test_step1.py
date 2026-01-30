@@ -11,8 +11,8 @@ from pathlib import Path
 # Add parent directory for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from amcfd_types import PhysicsParams, SimulationParams, LaserParams
-from amcfd_io import parse_input, load_toolpath, _read_namelist, _temp_to_enthalpy_solid
+from data_structures import PhysicsParams, SimulationParams, LaserParams
+from param import parse_input, load_toolpath, _read_namelist, _temp_to_enthalpy_solid
 
 # Path to actual input file (copied from fortran/inputfile/)
 INPUT_FILE = Path(__file__).parent / "inputfile" / "input_param.txt"
@@ -20,7 +20,7 @@ INPUT_FILE = Path(__file__).parent / "inputfile" / "input_param.txt"
 
 def test_parse_value():
     """Test parsing individual values."""
-    from amcfd_io import _parse_value, _parse_single_value
+    from param import _parse_value, _parse_single_value
     
     # Test integers
     assert _parse_single_value("42") == 42
@@ -85,7 +85,7 @@ def test_physics_params():
         'hlatent': 2.7e5,
     }
     
-    from amcfd_io import _create_physics_params
+    from param import _create_physics_params
     physics = _create_physics_params(params)
     
     assert physics.tsolid == 1563.0
@@ -112,7 +112,7 @@ def test_simulation_params():
         'nz': 50,
     }
     
-    from amcfd_io import _create_simulation_params
+    from param import _create_simulation_params
     sim = _create_simulation_params(params)
     
     assert sim.delt == 1.0e-6
@@ -134,7 +134,7 @@ def test_laser_params():
         'absorp': 0.35,
     }
     
-    from amcfd_io import _create_laser_params
+    from param import _create_laser_params
     laser = _create_laser_params(params)
     
     assert laser.power == 200.0
@@ -191,7 +191,7 @@ def test_sample_input_file():
 
 def test_geometry_parsing():
     """Test parsing of geometry section (zone-based grid)."""
-    from amcfd_io import _read_namelist
+    from param import _read_namelist
     
     if not INPUT_FILE.exists():
         print("⚠ Skipping geometry test - input file not found")

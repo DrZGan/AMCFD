@@ -74,9 +74,9 @@ These files contain:
 
 ---
 
-### Step 1: Types & Config
+### Step 1: Types & Config ✅ COMPLETE
 
-**Create:** `amcfd_types.py`, `amcfd_io.py`  
+**Create:** `data_structures.py`, `param.py`  
 **Convert:** `mod_const.f90`, `mod_param.f90`
 
 **Prompt:**
@@ -88,13 +88,13 @@ Create state containers and parse input configuration.
 - Physical constants: acpa, acpb, acpl, tsolid, tliquid, dgdt, emiss, sigma, hconv
 - Numerical params: delt, timax, urf_vel, urf_p, urf_h
 ```
-**Test:** Verify all parameters parsed correctly.
+**Test:** Verify all parameters parsed correctly. ✅ 8 tests pass
 
 ---
 
 ### Step 2: Grid Generation
 
-**Create:** `grid.py`  
+**Create:** `geom.py`  
 **Convert:** `mod_geom.f90`
 
 **Prompt:**
@@ -112,7 +112,7 @@ Generate non-uniform staggered grid with power-law stretching.
 
 ### Step 3: State Initialization
 
-**Create:** `initial.py`  
+**Create:** `init.py`  
 **Convert:** `mod_init.f90`
 
 **Prompt:**
@@ -130,7 +130,7 @@ Initialize flow field to preheat conditions.
 
 ### Step 4: Properties & H↔T Conversion
 
-**Create:** `properties.py`  
+**Create:** `prop.py`, `entot.py`  
 **Convert:** `mod_prop.f90`, `mod_entot.f90`
 
 **Prompt:**
@@ -150,7 +150,7 @@ Convert material properties and enthalpy↔temperature relations.
 
 ### Step 5: Laser & Toolpath
 
-**Create:** `laser.py`  
+**Create:** `laser.py`, `toolpath.py`  
 **Convert:** `mod_laser.f90`, `mod_toolpath.f90`
 
 **Prompt:**
@@ -168,7 +168,7 @@ Convert laser heat source and toolpath loading.
 
 ### Step 6: Boundary Conditions
 
-**Create:** `boundary.py`  
+**Create:** `bound.py`  
 **Convert:** `mod_bound.f90`
 
 **Prompt:**
@@ -185,7 +185,7 @@ Convert boundary conditions (selected by ivar=1,2,3,4,5).
 
 ### Step 7: Discretization & Source
 
-**Create:** `discretization.py`, `source.py`  
+**Create:** `discret.py`, `sour.py`  
 **Convert:** `mod_discret.f90`, `mod_sour.f90`
 
 **Prompt:**
@@ -204,7 +204,7 @@ Convert FVM discretization (performance critical).
 
 ### Step 8: TDMA Solver
 
-**Create:** `solver.py`  
+**Create:** `solve.py`  
 **Convert:** `mod_solve.f90`
 
 **Prompt:**
@@ -221,7 +221,7 @@ Convert TDMA solver.
 
 ### Step 9: Convergence & Pool Size
 
-**Create:** `convergence.py`, `pool.py`  
+**Create:** `converge.py`, `dimen.py`, `resid.py`, `flux.py`  
 **Convert:** `mod_converge.f90`, `mod_resid.f90`, `mod_dimen.f90`, `mod_flux.f90`
 
 **Prompt:**
@@ -238,7 +238,7 @@ Convert convergence checks and melt pool calculations.
 
 ### Step 10: Main Loop & Output
 
-**Create:** `main.py`  
+**Create:** `main.py`, `revise.py`  
 **Convert:** `main.f90`, `mod_revise.f90`, `mod_print.f90`
 
 **Prompt:**

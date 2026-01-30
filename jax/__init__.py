@@ -5,7 +5,7 @@ Powder Bed Fusion CFD simulation for Additive Manufacturing.
 Converted from Fortran to JAX for GPU acceleration.
 """
 
-from .amcfd_types import (
+from .data_structures import (
     PhysicsParams,
     SimulationParams,
     LaserParams,
@@ -22,7 +22,7 @@ from .amcfd_types import (
     OutputConfig,
 )
 
-from .amcfd_io import (
+from .param import (
     parse_input,
     load_toolpath,
     write_output_header,

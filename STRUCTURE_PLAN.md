@@ -3,63 +3,66 @@
 ## Proposed File Organization
 
 ```
-amcfd_jax/                    # or amcfd_taichi/
-├── amcfd_types.py    # NamedTuples/dataclasses for state containers
-├── grid.py           # Non-uniform staggered grid generation
-├── initial.py        # State initialization (preheat temp/enthalpy)
-├── boundary.py       # Boundary condition handlers (Marangoni, convection, radiation)
-├── properties.py     # Material properties, H↔T conversion (solid/mushy/liquid)
-├── discretization.py # FVM coefficients (ap, ae, aw, an, as, at, ab) - power law
-├── source.py         # Source terms (Darcy damping, buoyancy, latent heat)
-├── solver.py         # TDMA solver (line-by-line Thomas algorithm)
-├── convergence.py    # Residuals, convergence checks, heat balance
-├── laser.py          # Laser heat source, toolpath loading (.crs files)
-├── pool.py           # Melt pool dimension calculations (length/depth/width)
-├── main.py           # Main solver orchestration, time loop
-└── amcfd_io.py       # Input parsing (input_param.txt), output routines
+jax/                          # JAX implementation
+├── data_structures.py   # NamedTuples/dataclasses for state containers (from mod_const.f90)
+├── param.py             # Input parsing, output routines (from mod_param.f90, mod_print.f90)
+├── geom.py              # Non-uniform staggered grid generation (from mod_geom.f90)
+├── init.py              # State initialization (from mod_init.f90)
+├── bound.py             # Boundary condition handlers (from mod_bound.f90)
+├── prop.py              # Material properties (from mod_prop.f90)
+├── entot.py             # H↔T conversion (from mod_entot.f90)
+├── discret.py           # FVM coefficients (from mod_discret.f90)
+├── sour.py              # Source terms (from mod_sour.f90)
+├── solve.py             # TDMA solver (from mod_solve.f90)
+├── converge.py          # Convergence checks (from mod_converge.f90)
+├── laser.py             # Laser heat source (from mod_laser.f90)
+├── toolpath.py          # Toolpath loading (from mod_toolpath.f90)
+├── dimen.py             # Melt pool dimensions (from mod_dimen.f90)
+├── main.py              # Main solver orchestration (from main.f90)
+└── inputfile/           # Input files (input_param.txt, *.crs)
 ```
 
 ## Data Flow Diagram
 
 ```
 ┌──────────────────────────┐
-│  amcfd_io.parse_input    │ → SimulationParams, PhysicsParams
+│  param.parse_input       │ → SimulationParams, PhysicsParams
 └────────┬─────────────────┘
          ↓
 ┌──────────────────┐
-│  grid.generate   │ → GridParams (x, y, z, xu, yv, zw, vol, areas)
+│  geom.generate   │ → GridParams (x, y, z, xu, yv, zw, vol, areas)
 └────────┬─────────┘
          ↓
 ┌──────────────────┐
-│ initial.create   │ → State (uVel, vVel, wVel, p, enthalpy, temp)
+│ init.create      │ → State (uVel, vVel, wVel, p, enthalpy, temp)
 └────────┬─────────┘
          ↓
-┌──────────────────┐
-│ laser.load_path  │ → LaserState (toolpath, beam position)
-└────────┬─────────┘
+┌──────────────────────┐
+│ toolpath.load        │ → ToolPath (time, x, y, z, laser_on)
+└────────┬─────────────┘
          ↓
 ┌──────────────────────────────────────────────────────────────┐
 │                      TIME LOOP (timet < timax)                │
 │  ┌─────────────────────────────────────────────────────────┐ │
 │  │              ITERATION LOOP (until converged)            │ │
-│  │  ┌─────────┐   ┌──────────┐   ┌──────────┐   ┌───────┐  │ │
-│  │  │ laser   │ → │ boundary │ → │ discret  │ → │ solve │  │ │
-│  │  └─────────┘   └──────────┘   └──────────┘   └───┬───┘  │ │
-│  │                                                   ↓      │ │
-│  │  ┌─────────┐   ┌──────────┐   ┌──────────┐   ┌───────┐  │ │
-│  │  │ pool    │ ← │ props    │ ← │ H↔T      │ ← │ state │  │ │
-│  │  └─────────┘   └──────────┘   └──────────┘   └───────┘  │ │
+│  │  ┌───────────┐ ┌────────────┐ ┌────────────┐ ┌─────────┐│ │
+│  │  │  laser    │→│   bound    │→│  discret   │→│  solve  ││ │
+│  │  └───────────┘ └────────────┘ └────────────┘ └────┬────┘│ │
+│  │                                                    ↓     │ │
+│  │  ┌───────────┐ ┌────────────┐ ┌────────────┐ ┌─────────┐│ │
+│  │  │  dimen    │←│   prop     │←│   entot    │←│  state  ││ │
+│  │  └───────────┘ └────────────┘ └────────────┘ └─────────┘│ │
 │  │                       ↓                                  │ │
-│  │              convergence.check() → continue/break        │ │
+│  │              converge.check() → continue/break           │ │
 │  └─────────────────────────────────────────────────────────┘ │
 │                              ↓                                │
-│                    amcfd_io.write_output()                    │
+│                    param.write_output()                       │
 └──────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## State Container Definitions (amcfd_types.py)
+## State Container Definitions (data_structures.py)
 
 ```python
 from typing import NamedTuple
@@ -189,8 +192,8 @@ These exist only within function scope:
 | `ap, ae, aw, ...` | `[ni, nj, nk]` | FVM coefficients | `discretization.compute` |
 | `su, sp` | `[ni, nj, nk]` | Source terms | `source.compute` |
 | `heatin` | `[ni, nj]` | Laser heat flux | `laser.compute_heat` |
-| `residual` | scalar | Convergence metric | `convergence.compute_residual` |
-| `pool_length/depth/width` | scalars | Melt pool dimensions | `pool.compute_size` |
+| `residual` | scalar | Convergence metric | `mod_converge.compute_residual` |
+| `pool_length/depth/width` | scalars | Melt pool dimensions | `mod_dimen.compute_size` |
 
 ---
 
@@ -198,19 +201,19 @@ These exist only within function scope:
 
 | Module | Fortran Source | Inputs | Outputs | Notes |
 |--------|----------------|--------|---------|-------|
-| `amcfd_types.py` | - | - | NamedTuples | Data structure definitions |
-| `amcfd_io.py` | `mod_param`, `mod_print` | input_param.txt | Params, output files | Parse namelist format |
-| `grid.py` | `mod_geom` | Params | `GridParams` | Power-law stretching |
-| `initial.py` | `mod_init` | Params, Grid | `State` | Initialize to preheat T |
-| `properties.py` | `mod_prop`, `mod_entot` | State, Params | `MaterialProps`, T↔H | 3-region phase change |
-| `laser.py` | `mod_laser`, `mod_toolpath` | .crs file, time | `LaserState` | Gaussian heat source |
-| `boundary.py` | `mod_bound` | State, ivar | Updated su/sp | Marangoni, radiation |
-| `discretization.py` | `mod_discret` | State, Props | `DiscretCoeffs` | Power-law scheme |
-| `source.py` | `mod_sour` | State, Props | Updated su/sp | Darcy, buoyancy |
-| `solver.py` | `mod_solve` | Coeffs, State | New field | TDMA line-by-line |
-| `convergence.py` | `mod_converge`, `mod_resid` | State, Coeffs | Residuals, ratio | Heat balance check |
-| `pool.py` | `mod_dimen` | State, Grid | Pool dimensions | Solidus interpolation |
-| `main.py` | `main.f90`, `mod_revise` | All | Final State | Time loop, pressure correction |
+| `data_structures.py` | `mod_const` | - | NamedTuples | Data structure definitions |
+| `param.py` | `mod_param`, `mod_print` | input_param.txt | Params, output files | Parse namelist format |
+| `geom.py` | `mod_geom` | Params | `GridParams` | Power-law stretching |
+| `init.py` | `mod_init` | Params, Grid | `State` | Initialize to preheat T |
+| `prop.py`, `entot.py` | `mod_prop`, `mod_entot` | State, Params | `MaterialProps`, T↔H | 3-region phase change |
+| `laser.py`, `toolpath.py` | `mod_laser`, `mod_toolpath` | .crs file, time | `LaserState` | Gaussian heat source |
+| `bound.py` | `mod_bound` | State, ivar | Updated su/sp | Marangoni, radiation |
+| `discret.py` | `mod_discret` | State, Props | `DiscretCoeffs` | Power-law scheme |
+| `sour.py` | `mod_sour` | State, Props | Updated su/sp | Darcy, buoyancy |
+| `solve.py` | `mod_solve` | Coeffs, State | New field | TDMA line-by-line |
+| `converge.py`, `resid.py` | `mod_converge`, `mod_resid` | State, Coeffs | Residuals, ratio | Heat balance check |
+| `dimen.py` | `mod_dimen` | State, Grid | Pool dimensions | Solidus interpolation |
+| `main.py`, `revise.py` | `main.f90`, `mod_revise` | All | Final State | Time loop, pressure correction |
 
 ---
 
@@ -367,19 +370,21 @@ main.iteration()
 
 | Module | Imports From |
 |--------|--------------|
-| `amcfd_types.py` | (none) |
-| `amcfd_io.py` | `amcfd_types` |
-| `grid.py` | `amcfd_types` |
-| `initial.py` | `amcfd_types` |
-| `laser.py` | `amcfd_types` |
-| `properties.py` | `amcfd_types` |
-| `boundary.py` | `amcfd_types`, `properties` |
-| `source.py` | `amcfd_types`, `properties` |
-| `discretization.py` | `amcfd_types` |
-| `solver.py` | `amcfd_types` |
-| `pool.py` | `amcfd_types` |
-| `convergence.py` | `amcfd_types` |
-| `main.py` | `amcfd_types`, `amcfd_io`, `grid`, `initial`, `laser`, `properties`, `boundary`, `source`, `discretization`, `solver`, `pool`, `convergence` |
+| `data_structures.py` | (none) |
+| `param.py` | `data_structures` |
+| `geom.py` | `data_structures` |
+| `init.py` | `data_structures` |
+| `laser.py` | `data_structures` |
+| `toolpath.py` | `data_structures` |
+| `prop.py` | `data_structures` |
+| `entot.py` | `data_structures` |
+| `bound.py` | `data_structures`, `prop` |
+| `sour.py` | `data_structures`, `prop` |
+| `discret.py` | `data_structures` |
+| `solve.py` | `data_structures` |
+| `dimen.py` | `data_structures` |
+| `converge.py` | `data_structures` |
+| `main.py` | `data_structures`, `param`, `geom`, `init`, `laser`, `toolpath`, `prop`, `entot`, `bound`, `sour`, `discret`, `solve`, `dimen`, `converge` |
 
 ---
 
@@ -387,22 +392,22 @@ main.iteration()
 
 | Fortran Module | JAX/Taichi Module | Key Functions |
 |----------------|-------------------|---------------|
-| `mod_const.f90` | `amcfd_types.py` | Physical constants in PhysicsParams |
-| `mod_param.f90` | `amcfd_io.py` | `parse_input()` |
-| `mod_geom.f90` | `grid.py` | `generate_grid()` |
-| `mod_init.f90` | `initial.py` | `initialize_state()` |
-| `mod_prop.f90` | `properties.py` | `compute_properties()` |
-| `mod_entot.f90` | `properties.py` | `enthalpy_to_temp()`, `temp_to_enthalpy()` |
+| `mod_const.f90` | `data_structures.py` | Physical constants in PhysicsParams |
+| `mod_param.f90` | `param.py` | `parse_input()` |
+| `mod_geom.f90` | `geom.py` | `generate_grid()` |
+| `mod_init.f90` | `init.py` | `initialize_state()` |
+| `mod_prop.f90` | `prop.py` | `compute_properties()` |
+| `mod_entot.f90` | `entot.py` | `enthalpy_to_temp()`, `temp_to_enthalpy()` |
 | `mod_laser.f90` | `laser.py` | `compute_heat()` |
-| `mod_toolpath.f90` | `laser.py` | `load_toolpath()`, `update_position()` |
-| `mod_bound.f90` | `boundary.py` | `apply_bc()` per variable |
-| `mod_discret.f90` | `discretization.py` | `compute_coefficients()` |
-| `mod_sour.f90` | `source.py` | `compute_source()` |
-| `mod_solve.f90` | `solver.py` | `tdma_solve()` |
-| `mod_dimen.f90` | `pool.py` | `compute_pool_size()` |
-| `mod_converge.f90` | `convergence.py` | `check_convergence()` |
-| `mod_resid.f90` | `convergence.py` | `compute_residual()` |
-| `mod_revise.f90` | `main.py` | `pressure_correction()` |
-| `mod_flux.f90` | `convergence.py` | `compute_heat_balance()` |
-| `mod_print.f90` | `amcfd_io.py` | `write_output()`, `write_tecplot()` |
+| `mod_toolpath.f90` | `toolpath.py` | `load_toolpath()`, `update_position()` |
+| `mod_bound.f90` | `bound.py` | `apply_bc()` per variable |
+| `mod_discret.f90` | `discret.py` | `compute_coefficients()` |
+| `mod_sour.f90` | `sour.py` | `compute_source()` |
+| `mod_solve.f90` | `solve.py` | `tdma_solve()` |
+| `mod_dimen.f90` | `dimen.py` | `compute_pool_size()` |
+| `mod_converge.f90` | `converge.py` | `check_convergence()` |
+| `mod_resid.f90` | `resid.py` | `compute_residual()` |
+| `mod_revise.f90` | `revise.py` | `pressure_correction()` |
+| `mod_flux.f90` | `flux.py` | `compute_heat_balance()` |
+| `mod_print.f90` | `param.py` | `write_output()`, `write_tecplot()` |
 | `main.f90` | `main.py` | `run_simulation()`, time/iteration loops |

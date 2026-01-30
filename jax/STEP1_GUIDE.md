@@ -2,14 +2,14 @@
 
 ## Files Created
 
-| File | Lines | Purpose |
-|------|-------|---------|
-| `amcfd_types.py` | 370 | All NamedTuple definitions (State, GridParams, PhysicsParams, etc.) |
-| `amcfd_io.py` | 530 | Parse Fortran input files (geometry + namelists), load toolpath, write output |
-| `test_step1.py` | 280 | Unit tests validating parsing and data structures |
-| `inputfile/` | - | Input files copied from Fortran: `input_param.txt`, `B26.crs`, `B26-1.crs` |
+| File | Lines | Purpose | Fortran Source |
+|------|-------|---------|----------------|
+| `data_structures.py` | 370 | All NamedTuple definitions (State, GridParams, PhysicsParams, etc.) | `mod_const.f90` |
+| `param.py` | 530 | Parse Fortran input files (geometry + namelists), load toolpath, write output | `mod_param.f90`, `mod_print.f90` |
+| `test_step1.py` | 280 | Unit tests validating parsing and data structures | - |
+| `inputfile/` | - | Input files copied from Fortran: `input_param.txt`, `B26.crs`, `B26-1.crs` | - |
 
-**Note**: `amcfd_` prefix avoids conflicts with Python's built-in `types` and `io` modules.
+**Naming Convention**: Python files match Fortran module names without the `mod_` prefix (e.g., `mod_param.f90` → `param.py`).
 
 ## Input Files
 
