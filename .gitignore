@@ -1,0 +1,34 @@
+# Compiled object files
+*.o
+
+# Fortran module files (compiler-generated)
+*.mod
+
+# Executables
+main
+main_omp
+cluster_main
+
+# Tecplot output files
+*.tec
+
+# Result/output files
+result/*.tec
+result/*.txt
+
+# Backup files
+*.bak
+*~
+*.f90~
+
+# Log files
+*.log
+
+# Editor files
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,27 @@
+!-----geometrical parameters---------
+1		       		!number of x-zones
+4.0e-3			 	!length of each x-zone (m)
+200				 	!number of control volumes in each x-zone
+1					!exponents to define control volume boundaries
+1                  	!number of y-zones	
+4.0e-3				!length of each y-zone (m)
+200			        !number of control volumes in each y-zone
+1			        !exponents to define control volume boundaries
+2                  	!number of z-zones	
+0.5e-3  0.2e-3 		!length of each z-zone (m)
+10  20				!number of control volumes in each z-zone
+-1.5  1				!exponents to define control volume boundaries
+
+&process_parameters  alaspow=0, alaseta=0, alasrb=0.05e-3, alasfact=2/
+
+&volumetric_parameters alaspowvol=300, alasetavol=0.3512, sourcerad=31.71e-6, sourcedepth=109.63e-6/
+
+&material_properties  dens=8440, denl=7640, viscos=0.007, tsolid=1563, tliquid=1623, tboiling=2650, hsmelt=861e3, hlfriz=1151e3, acpa=0.2441,acpb=338.59, acpl=709.25, thconsa=0.0155, thconsb=5.0435, thconl=30.078, beta=5e-5, emiss=0.3, dgdtp=-3.8e-4/
+
+&powder_properties layerheight=0.04e-3, pden=4330, pcpa=0.2508, pcpb=357.7, pthcona=0, pthconb=0.995/
+
+&numerical_relax maxit=50, delt=2e-5,  timax=0.02351189, urfu=0.7, urfv=0.7, urfw=0.7, urfp=0.7, urfh=0.7 /
+
+&boundary_conditions   htci=5, htcj=5, htck1=5, htckn=5, tempWest=293, tempEast=293, 
+	tempNorth=293,	tempBottom=293,	tempPreheat=293, tempAmb=293  /
+

@@ -1,0 +1,18 @@
+feat: Implement Step 1 - Types & Config for JAX migration
+
+- Add amcfd_types.py: All NamedTuple definitions (State, GridParams, PhysicsParams, etc.)
+- Add amcfd_io.py: Fortran namelist parser, input/output handlers
+- Add test_step1.py: Unit tests for parsing and type creation
+- Add STEP1_GUIDE.md: Concise implementation guide
+- Update STRUCTURE_PLAN.md: Reflect amcfd_* module naming
+- Update MIGRATION_PLAN.md: Reference amcfd_* modules
+
+Implements all Step 1 requirements:
+✓ Parse input_param.txt (namelist format)
+✓ Define immutable state containers
+✓ Physical constants (acpa, tsolid, dgdt, sigma, etc.)
+✓ Numerical params (delt, timax, urf_*)
+✓ All tests pass (6/6)
+
+Files: amcfd_types.py (370L), amcfd_io.py (280L), test_step1.py (180L)
+Total: ~880 lines
