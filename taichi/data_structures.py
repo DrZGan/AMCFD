@@ -234,6 +234,24 @@ class GridParams:
         self.areaik = ti.field(dtype=ti.f64, shape=(ni, nk))
         self.areajk = ti.field(dtype=ti.f64, shape=(nj, nk))
 
+        # Velocity control volumes (staggered)
+        self.volume_u = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
+        self.volume_v = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
+        self.volume_w = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
+
+        # Velocity control volume areas
+        self.areauij = ti.field(dtype=ti.f64, shape=(ni, nj))
+        self.areauik = ti.field(dtype=ti.f64, shape=(ni, nk))
+        self.areavij = ti.field(dtype=ti.f64, shape=(ni, nj))
+        self.areavjk = ti.field(dtype=ti.f64, shape=(nj, nk))
+        self.areawik = ti.field(dtype=ti.f64, shape=(ni, nk))
+        self.areawjk = ti.field(dtype=ti.f64, shape=(nj, nk))
+
+        # Interpolation fractions
+        self.fracx = ti.field(dtype=ti.f64, shape=(ni,))
+        self.fracy = ti.field(dtype=ti.f64, shape=(nj,))
+        self.fracz = ti.field(dtype=ti.f64, shape=(nk,))
+
 
 @ti.data_oriented
 class State:
@@ -288,6 +306,8 @@ class MaterialProps:
         self.diff = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.den = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.tcond = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
+        # Volumetric heat source (from laser absorption)
+        self.sourceinput = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
 
 
 @ti.data_oriented
@@ -305,8 +325,12 @@ class DiscretCoeffs:
         self.ab = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.su = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.sp = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
+<<<<<<< HEAD
         
         # Velocity correction coefficients (for SIMPLE algorithm)
+=======
+        self.apnot = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
+>>>>>>> 2390666 (adding discret.py and test_discret.py)
         self.dux = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.dvy = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.dwz = ti.field(dtype=ti.f64, shape=(ni, nj, nk))

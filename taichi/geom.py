@@ -148,11 +148,34 @@ def build_gridparams(cfg: Dict) -> GridParams:
         dzptinv[k] = 1.0 / (z[k + 1] - z[k]) if z[k + 1] != z[k] else 0.0
     dzptinv[-1] = dzptinv[-2] if nk > 1 else 0.0
 
+    # Interpolation fractions
+    fracx = np.zeros(ni, dtype=np.float64)
+    fracy = np.zeros(nj, dtype=np.float64)
+    fracz = np.zeros(nk, dtype=np.float64)
+    for i in range(0, ni - 1):
+        denom = x[i + 1] - x[i]
+        fracx[i] = (x[i + 1] - xu[i + 1]) / denom if denom != 0.0 else 0.0
+    for j in range(0, nj - 1):
+        denom = y[j + 1] - y[j]
+        fracy[j] = (y[j + 1] - yv[j + 1]) / denom if denom != 0.0 else 0.0
+    for k in range(0, nk - 1):
+        denom = z[k + 1] - z[k]
+        fracz[k] = (z[k + 1] - zw[k + 1]) / denom if denom != 0.0 else 0.0
+
     # Volumes and areas (interior nodes only, others remain zero)
     vol = np.zeros((ni, nj, nk), dtype=np.float64)
+    volume_u = np.zeros((ni, nj, nk), dtype=np.float64)
+    volume_v = np.zeros((ni, nj, nk), dtype=np.float64)
+    volume_w = np.zeros((ni, nj, nk), dtype=np.float64)
     areaij = np.zeros((ni, nj), dtype=np.float64)
     areaik = np.zeros((ni, nk), dtype=np.float64)
     areajk = np.zeros((nj, nk), dtype=np.float64)
+    areauij = np.zeros((ni, nj), dtype=np.float64)
+    areauik = np.zeros((ni, nk), dtype=np.float64)
+    areavij = np.zeros((ni, nj), dtype=np.float64)
+    areavjk = np.zeros((nj, nk), dtype=np.float64)
+    areawik = np.zeros((ni, nk), dtype=np.float64)
+    areawjk = np.zeros((nj, nk), dtype=np.float64)
 
     nim1 = ni - 1
     njm1 = nj - 1
@@ -161,18 +184,27 @@ def build_gridparams(cfg: Dict) -> GridParams:
         for j in range(1, njm1):
             for i in range(1, nim1):
                 vol[i, j, k] = (xu[i + 1] - xu[i]) * (yv[j + 1] - yv[j]) * (zw[k + 1] - zw[k])
+                volume_u[i, j, k] = (x[i] - x[i - 1]) * (yv[j + 1] - yv[j]) * (zw[k + 1] - zw[k])
+                volume_v[i, j, k] = (xu[i + 1] - xu[i]) * (y[j] - y[j - 1]) * (zw[k + 1] - zw[k])
+                volume_w[i, j, k] = (xu[i + 1] - xu[i]) * (yv[j + 1] - yv[j]) * (z[k] - z[k - 1])
 
     for j in range(1, njm1):
         for i in range(1, nim1):
             areaij[i, j] = (xu[i + 1] - xu[i]) * (yv[j + 1] - yv[j])
+            areauij[i, j] = (x[i] - x[i - 1]) * (yv[j + 1] - yv[j])
+            areavij[i, j] = (xu[i + 1] - xu[i]) * (y[j] - y[j - 1])
 
     for k in range(1, nkm1):
         for i in range(1, nim1):
             areaik[i, k] = (xu[i + 1] - xu[i]) * (zw[k + 1] - zw[k])
+            areawik[i, k] = (xu[i + 1] - xu[i]) * (z[k] - z[k - 1])
+            areauik[i, k] = (x[i] - x[i - 1]) * (zw[k + 1] - zw[k])
 
     for k in range(1, nkm1):
         for j in range(1, njm1):
             areajk[j, k] = (yv[j + 1] - yv[j]) * (zw[k + 1] - zw[k])
+            areavjk[j, k] = (y[j] - y[j - 1]) * (zw[k + 1] - zw[k])
+            areawjk[j, k] = (yv[j + 1] - yv[j]) * (z[k] - z[k - 1])
 
     # Create GridParams and populate (Taichi should already be initialized)
     gp = GridParams(ni=ni, nj=nj, nk=nk)
@@ -196,9 +228,21 @@ def build_gridparams(cfg: Dict) -> GridParams:
     gp.dzptinv.from_numpy(dzptinv)
 
     gp.vol.from_numpy(vol)
+    gp.volume_u.from_numpy(volume_u)
+    gp.volume_v.from_numpy(volume_v)
+    gp.volume_w.from_numpy(volume_w)
     gp.areaij.from_numpy(areaij)
     gp.areaik.from_numpy(areaik)
     gp.areajk.from_numpy(areajk)
+    gp.areauij.from_numpy(areauij)
+    gp.areauik.from_numpy(areauik)
+    gp.areavij.from_numpy(areavij)
+    gp.areavjk.from_numpy(areavjk)
+    gp.areawik.from_numpy(areawik)
+    gp.areawjk.from_numpy(areawjk)
+    gp.fracx.from_numpy(fracx)
+    gp.fracy.from_numpy(fracy)
+    gp.fracz.from_numpy(fracz)
 
     return gp
 
