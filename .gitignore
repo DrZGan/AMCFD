@@ -4,6 +4,19 @@
 # Fortran module files (compiler-generated)
 *.mod
 
+# Python bytecode and cache
+*.pyc
+*.pyo
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python virtual environments
+taichi_env/
+venv/
+.venv/
+env/
+
 # Executables
 main
 main_omp

@@ -5,7 +5,7 @@ import numpy as np
 import yaml
 import taichi as ti
 
-from .data_structures import GridParams
+from data_structures import GridParams
 
 ti.init(arch=ti.cpu)
 
@@ -49,7 +49,7 @@ def _axis_params(axis_cfg: Dict) -> Tuple[List[float], List[int], List[float]]:
 
     return lengths, counts, exps
 
-@ti.kernel
+
 def build_gridparams(cfg: Dict) -> GridParams:
     geom_cfg = cfg["geometry"]
 
@@ -174,10 +174,7 @@ def build_gridparams(cfg: Dict) -> GridParams:
         for j in range(1, njm1):
             areajk[j, k] = (yv[j + 1] - yv[j]) * (zw[k + 1] - zw[k])
 
-    # Initialize Taichi and populate GridParams
-    if not ti.core.is_initialized():
-        ti.init(arch=ti.cpu)
-
+    # Create GridParams and populate (Taichi should already be initialized)
     gp = GridParams(ni=ni, nj=nj, nk=nk)
 
     gp.x.from_numpy(x)

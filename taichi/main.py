@@ -24,10 +24,16 @@ from data_structures import (
     TimeState, PoolDimensions, ConvergenceState
 )
 
-# I/O and geometry
-from param import parse_input, load_toolpath
+# I/O, geometry, and toolpath
+from param import parse_input
+from toolpath import load_toolpath, read_coordinates as toolpath_read_coordinates
 from geom import get_gridparams
+<<<<<<< HEAD
 from bound import bound_condition
+=======
+from entot import enthalpy_to_temp as entot_enthalpy_to_temp
+from dimen import pool_size, clean_uvw
+>>>>>>> 7694ccf48a9a48078b525656a3023f49f25a62c1
 
 # TODO: These modules will be created from corresponding .f90 files
 # from initialization import initialize
@@ -37,11 +43,9 @@ from bound import bound_condition
 # from solver import solution_enthalpy, solution_uvw
 # from fluxes import heat_fluxes
 # from properties import properties
-# from entotemp import enthalpy_to_temp
 # from convergence import enhance_converge_speed
 # from revision import revision_p
 # from laserinput import laser_beam, calc_rhf
-# from toolpath import read_coordinates
 # from printing import output_results, custom_output
 
 
@@ -164,12 +168,12 @@ def enthalpy_to_temp(state: State, physics: PhysicsParams) -> State:
     """Convert enthalpy field to temperature. (From entotemp.f90)
     
     Translates enthalpy to temperature, handling phase change.
+    Uses the implementation from entot.py module.
     
     Returns:
         state: Updated state with temperature and liquid fraction fields
     """
-    # TODO: Implement enthalpy-to-temperature conversion with mushy zone
-    return state
+    return entot_enthalpy_to_temp(state, physics)
 
 
 def pool_size(state: State, grid: GridParams, physics: PhysicsParams,
@@ -179,12 +183,14 @@ def pool_size(state: State, grid: GridParams, physics: PhysicsParams,
     Gets melt pool dimension, start and end index of i,j,k to determine fluid region.
     Also updates pool.max_temp (tpeak in Fortran).
     
+    NOTE: This is now imported from dimen.py module
+    
     Returns:
         tuple: (ist, ien, jst, jen, kst, ken) - start/end indices for melt pool region
     """
-    # TODO: Find liquid region bounds and compute pool dimensions
-    pool.max_temp = 300.0  # Placeholder - should compute actual peak temp
-    return (1, 1, 1, 1, 1, 1)  # ist, ien, jst, jen, kst, ken
+    # This import is at module level now
+    from dimen import pool_size as dimen_pool_size
+    return dimen_pool_size(state, grid, physics, pool)
 
 
 def clean_uvw(state: State, grid: GridParams, physics: PhysicsParams) -> State:
@@ -192,11 +198,14 @@ def clean_uvw(state: State, grid: GridParams, physics: PhysicsParams) -> State:
     
     Sets velocity to zero for cells where temp <= tsolid (outside liquid region).
     
+    NOTE: This is now imported from dimen.py module
+    
     Returns:
         state: Updated state with velocities zeroed in solid region
     """
-    # TODO: Zero velocities in solid cells
-    return state
+    # This import is at module level now
+    from dimen import clean_uvw as dimen_clean_uvw
+    return dimen_clean_uvw(state, grid, physics)
 
 
 def revision_p(state: State, coeffs: DiscretCoeffs, grid: GridParams,
@@ -255,12 +264,12 @@ def read_coordinates(time_state: TimeState, toolpath: ToolPath,
     """Read/interpolate coordinates from toolpath. (From toolpath.f90)
     
     Reads current position along toolpath based on simulation time.
+    Uses the implementation from toolpath.py module.
     
     Returns:
         laser_state: Updated with current beam coordinates
     """
-    # TODO: Interpolate toolpath to get current coordinates
-    return laser_state
+    return toolpath_read_coordinates(time_state, toolpath, laser_state)
 
 
 def output_results(time_state: TimeState, state: State, conv: ConvergenceState,
