@@ -306,6 +306,8 @@ class MaterialProps:
         self.diff = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.den = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.tcond = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
+        # Volumetric heat source (from laser absorption)
+        self.sourceinput = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
 
 
 @ti.data_oriented

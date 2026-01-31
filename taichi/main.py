@@ -36,6 +36,9 @@ from revise import revision_p as revise_revision_p
 from discret import discretize
 >>>>>>> 2390666 (adding discret.py and test_discret.py)
 
+# Import the new flux module
+from flux import HeatFluxCalculator, heat_fluxes as compute_heat_fluxes
+
 # TODO: These modules will be created from corresponding .f90 files
 # from initialization import initialize
 # from source import source_term
@@ -54,6 +57,7 @@ from discret import discretize
 # ============================================================================
 # Placeholder functions (to be replaced by actual module imports)
 # ============================================================================
+
 
 def initialize(state: State, state_prev: StatePrev, mat_props: MaterialProps,
                physics: PhysicsParams, grid: GridParams) -> None:
@@ -209,44 +213,6 @@ def revision_p(state: State, coeffs: DiscretCoeffs, grid: GridParams,
     return state
 
 
-def heat_fluxes(state: State, laser_state: LaserState, grid: GridParams,
-                physics: PhysicsParams, conv: ConvergenceState) -> ConvergenceState:
-    """Compute heat balance ratio. (From fluxes.f90)
-    
-    Calculates criteria of energy conservation (ratio of heat in vs out).
-    
-    Returns:
-        conv: Updated convergence state with heat_ratio
-    """
-    conv.heat_ratio = 1.0  # Placeholder - TODO: compute actual heat balance
-    return conv
-
-
-def laser_beam(time_state: TimeState, toolpath: ToolPath, 
-               laser_state: LaserState, laser: LaserParams) -> LaserState:
-    """Update laser position and state. (From laserinput.f90)
-    
-    Updates beam position based on current time and toolpath.
-    
-    Returns:
-        laser_state: Updated laser state (position, on/off status)
-    """
-    # TODO: Interpolate toolpath to get current beam position
-    return laser_state
-
-
-def calc_rhf(laser_state: LaserState, grid: GridParams, laser: LaserParams) -> LaserState:
-    """Calculate radiative heat flux from laser. (From laserinput.f90)
-    
-    Computes Gaussian heat flux distribution at surface (heatin array).
-    
-    Returns:
-        laser_state: Updated with heatin (surface heat flux) array
-    """
-    # TODO: Compute Gaussian heat flux distribution
-    return laser_state
-
-
 def read_coordinates(time_state: TimeState, toolpath: ToolPath, 
                      laser_state: LaserState) -> LaserState:
     """Read/interpolate coordinates from toolpath. (From toolpath.f90)
@@ -331,6 +297,9 @@ def main():
     material_props = MaterialProps(ni, nj, nk)
     discret_coeffs = DiscretCoeffs(ni, nj, nk)
     laser_state = LaserState(ni, nj)
+    
+    # Allocate flux calculator
+    flux_calc = HeatFluxCalculator(ni, nj, nk)
     
     # Initialize variables (corresponds to initialize in Fortran)
     print("Initializing fields...")
@@ -417,7 +386,11 @@ def main():
             # ============================================================
             # Check convergence
             # ============================================================
-            heat_fluxes(state, laser_state, grid, physics, conv)
+            # Use the new heat_fluxes function
+            compute_heat_fluxes(state, state_prev, mat_props, grid,
+                               physics, sim, laser_state,
+                               mat_props.sourceinput, ahtoploss,
+                               conv, flux_calc)
             
             conv.max_residual = max(conv.residual_h, conv.residual_u,
                                    conv.residual_v, conv.residual_w)
