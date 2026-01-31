@@ -335,52 +335,6 @@ def _create_output_config(params: Dict[str, Any]) -> OutputConfig:
     )
 
 
-def load_toolpath(filepath: str) -> ToolPath:
-    """
-    Load toolpath from .crs file.
-    
-    Format: 5 columns - time, x, y, z, laser_on
-    
-    Args:
-        filepath: Path to .crs toolpath file
-        
-    Returns:
-        ToolPath dataclass
-    """
-    data = []
-    
-    with open(filepath, 'r') as f:
-        for line in f:
-            line = line.strip()
-            if not line or line.startswith('#') or line.startswith('!'):
-                continue
-            
-            parts = line.split()
-            if len(parts) >= 5:
-                try:
-                    row = [float(p) for p in parts[:5]]
-                    data.append(row)
-                except ValueError:
-                    continue
-    
-    if not data:
-        # Return empty toolpath
-        return ToolPath(
-            time=np.array([0.0]),
-            x=np.array([0.0]),
-            y=np.array([0.0]),
-            z=np.array([0.0]),
-            laser_on=np.array([0], dtype=np.int32),
-            n_segments=1,
-        )
-    
-    data = np.array(data)
-    
-    return ToolPath(
-        time=data[:, 0],
-        x=data[:, 1],
-        y=data[:, 2],
-        z=data[:, 3],
-        laser_on=data[:, 4].astype(np.int32),
-        n_segments=len(data),
-    )
+# Note: load_toolpath has been moved to toolpath.py
+# For backwards compatibility, re-export it here
+from toolpath import load_toolpath

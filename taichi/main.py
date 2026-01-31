@@ -24,8 +24,9 @@ from data_structures import (
     TimeState, PoolDimensions, ConvergenceState
 )
 
-# I/O and geometry
-from param import parse_input, load_toolpath
+# I/O, geometry, and toolpath
+from param import parse_input
+from toolpath import load_toolpath, read_coordinates as toolpath_read_coordinates
 from geom import get_gridparams
 
 # TODO: These modules will be created from corresponding .f90 files
@@ -41,7 +42,6 @@ from geom import get_gridparams
 # from convergence import enhance_converge_speed
 # from revision import revision_p
 # from laserinput import laser_beam, calc_rhf
-# from toolpath import read_coordinates
 # from printing import output_results, custom_output
 
 
@@ -269,12 +269,12 @@ def read_coordinates(time_state: TimeState, toolpath: ToolPath,
     """Read/interpolate coordinates from toolpath. (From toolpath.f90)
     
     Reads current position along toolpath based on simulation time.
+    Uses the implementation from toolpath.py module.
     
     Returns:
         laser_state: Updated with current beam coordinates
     """
-    # TODO: Interpolate toolpath to get current coordinates
-    return laser_state
+    return toolpath_read_coordinates(time_state, toolpath, laser_state)
 
 
 def output_results(time_state: TimeState, state: State, conv: ConvergenceState,
