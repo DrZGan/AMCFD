@@ -141,13 +141,18 @@ class SimulationParams:
         self.nkm1 = self.nk - 1
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class LaserParams:
     """Laser parameters (from mod_param.f90, mod_laser.f90)"""
     power: float = 200.0        # Laser power [W]
     radius: float = 50.0e-6     # Beam radius (1/e²) [m]
     absorptivity: float = 0.35  # Absorptivity [-]
     efficiency: float = 1.0     # Laser efficiency [-]
+    power_vol: float = 0.0      # Volumetric laser power [W]
+    absorptivity_vol: float = 0.0  # Volumetric absorptivity [-]
+    source_radius: float = 0.0     # Volumetric source radius [m]
+    source_depth: float = 0.0      # Volumetric source depth [m]
+    factor: float = 1.0            # Gaussian shape factor (alasfact)
     
     # Derived: peak heat flux
     peak_flux: float = 0.0      # Peak heat flux [W/m²]
@@ -325,12 +330,8 @@ class DiscretCoeffs:
         self.ab = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.su = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.sp = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
-<<<<<<< HEAD
-        
-        # Velocity correction coefficients (for SIMPLE algorithm)
-=======
         self.apnot = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
->>>>>>> 2390666 (adding discret.py and test_discret.py)
+        # Velocity correction coefficients (for SIMPLE algorithm)
         self.dux = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.dvy = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.dwz = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
@@ -351,6 +352,7 @@ class LaserState:
         self.scanvel_y = 0.0        # Scan velocity in y [m/s]
         self.current_segment = 0    # Current toolpath segment index
         self.heat_total = 0.0       # Total heat input this timestep [W]
+        self.rhf = 1.0              # Reheating factor (RHF)
 
 
 @dataclass

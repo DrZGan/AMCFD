@@ -28,13 +28,11 @@ from data_structures import (
 from param import parse_input, load_toolpath
 from geom import get_gridparams
 from bound import bound_condition
-<<<<<<< HEAD
+from discret import discretize
+from sour import source_term
 from entot import enthalpy_to_temp as entot_enthalpy_to_temp
 from dimen import pool_size, clean_uvw
 from revise import revision_p as revise_revision_p
-=======
-from discret import discretize
->>>>>>> 2390666 (adding discret.py and test_discret.py)
 
 # Import the new flux module
 from flux import HeatFluxCalculator, heat_fluxes as compute_heat_fluxes
@@ -88,21 +86,6 @@ def properties(state: State, mat_props: MaterialProps, physics: PhysicsParams) -
     return mat_props
 
 
-
-def source_term(ivar: int, state: State, state_prev: StatePrev,
-                grid: GridParams, coeffs: DiscretCoeffs,
-                laser_state: LaserState, physics: PhysicsParams,
-                sim: SimulationParams) -> DiscretCoeffs:
-    """Add source terms to discretized equations. (From source.f90)
-    
-    Args:
-        ivar: Variable index (1=u, 2=v, 3=w, 4=p, 5=enthalpy)
-        
-    Returns:
-        coeffs: Updated coefficients with source terms (su, sp) added
-    """
-    # TODO: Implement source terms (laser heat, buoyancy, Darcy damping)
-    return coeffs
 
 
 def residual(ivar: int, state: State, coeffs: DiscretCoeffs, 
@@ -353,8 +336,8 @@ def main():
             properties(state, mat_props, physics)
             ahtoploss = bound_condition(ivar, state, grid, mat_props, physics, simu_params, laser_state)
             discretize(ivar, state, state_prev, grid, coeffs, mat_props, sim, physics)
-            source_term(ivar, state, state_prev, grid, coeffs, 
-                       laser_state, physics, sim)
+            source_term(ivar, state, state_prev, grid, coeffs, mat_props,
+                       laser_state, physics, sim, laser)
             residual(ivar, state, coeffs, conv)
             
             enhance_converge_speed(coeffs, grid)
@@ -377,8 +360,8 @@ def main():
                 for ivar in range(1, 5):
                     bound_condition(ivar, state, grid, mat_props, physics, simu_params)
                     discretize(ivar, state, state_prev, grid, coeffs, mat_props, sim, physics)
-                    source_term(ivar, state, state_prev, grid, coeffs,
-                               laser_state, physics, sim)
+                    source_term(ivar, state, state_prev, grid, coeffs, mat_props,
+                               laser_state, physics, sim, laser)
                     residual(ivar, state, coeffs, conv)
                     solution_uvw(ivar, state, coeffs, grid, sim)
                     revision_p(state, coeffs, grid, sim)

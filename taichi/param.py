@@ -308,10 +308,15 @@ def _create_laser_params(params: Dict[str, Any]) -> LaserParams:
     import math
     
     # Try volumetric parameters first (more commonly used)
-    power = _get_scalar(params, 'alaspowvol', 'alaspow', 'power', 'plaser', default=200.0)
-    absorptivity = _get_scalar(params, 'alasetavol', 'alaseta', 'absorptivity', 'absorp', default=0.35)
-    radius = _get_scalar(params, 'sourcerad', 'alasrb', 'radius', 'rb', default=50.0e-6)
+    power = _get_scalar(params, 'alaspow', 'power', 'plaser', default=200.0)
+    absorptivity = _get_scalar(params, 'alaseta', 'absorptivity', 'absorp', default=0.35)
+    radius = _get_scalar(params, 'alasrb', 'radius', 'rb', default=50.0e-6)
     efficiency = _get_scalar(params, 'alasfact', 'efficiency', 'eff', default=1.0)
+    power_vol = _get_scalar(params, 'alaspowvol', default=power)
+    absorptivity_vol = _get_scalar(params, 'alasetavol', default=absorptivity)
+    source_radius = _get_scalar(params, 'sourcerad', default=radius)
+    source_depth = _get_scalar(params, 'sourcedepth', default=0.0)
+    factor = _get_scalar(params, 'alasfact', default=efficiency)
     
     # Compute peak heat flux for Gaussian distribution
     peak_flux = 2.0 * power * absorptivity * efficiency / (math.pi * radius * radius)
@@ -321,6 +326,11 @@ def _create_laser_params(params: Dict[str, Any]) -> LaserParams:
         radius=radius,
         absorptivity=absorptivity,
         efficiency=efficiency,
+        power_vol=power_vol,
+        absorptivity_vol=absorptivity_vol,
+        source_radius=source_radius,
+        source_depth=source_depth,
+        factor=factor,
         peak_flux=peak_flux,
     )
 
