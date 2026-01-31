@@ -1,5 +1,27 @@
 """
 Tests for data_structures.py - Taichi field creation and data classes.
+
+Test Summary:
+-----------------------------------------------------------------------------
+| Test                        | Purpose                                      |
+-----------------------------------------------------------------------------
+| test_physics_params_defaults| Tests PhysicsParams dataclass defaults       |
+| test_simulation_params_     | Tests SimulationParams dataclass defaults    |
+|   defaults                  |                                              |
+| test_laser_params_peak_flux | Tests LaserParams peak flux calculation      |
+| test_toolpath_defaults      | Tests ToolPath dataclass initialization      |
+| test_grid_params_creation   | Tests GridParams Taichi field creation       |
+| test_state_creation         | Tests State Taichi field creation            |
+| test_state_prev_creation    | Tests StatePrev Taichi field creation        |
+| test_material_props_creation| Tests MaterialProps Taichi field creation    |
+| test_discret_coeffs_creation| Tests DiscretCoeffs Taichi field creation    |
+| test_laser_state_creation   | Tests LaserState Taichi field creation       |
+| test_time_state_defaults    | Tests TimeState dataclass defaults           |
+| test_pool_dimensions_defaults| Tests PoolDimensions dataclass defaults     |
+| test_convergence_state_     | Tests ConvergenceState dataclass defaults    |
+|   defaults                  |                                              |
+| test_taichi_field_operations| Tests Taichi field read/write operations     |
+-----------------------------------------------------------------------------
 """
 
 import sys

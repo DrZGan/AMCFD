@@ -1,5 +1,17 @@
 """
 Tests for param.py - Parameter parsing from YAML files.
+
+Test Summary:
+-----------------------------------------------------------------------------
+| Test                    | Purpose                                          |
+-----------------------------------------------------------------------------
+| test_enthalpy_conversion| Tests enthalpy calculation from temperature      |
+| test_physics_params     | Tests PhysicsParams creation with defaults       |
+| test_simulation_params  | Tests SimulationParams creation                  |
+| test_laser_params       | Tests LaserParams creation and peak flux calc    |
+| test_geometry_parsing   | Tests geometry parameter parsing from YAML       |
+| test_yaml_input_file    | Tests full YAML input file parsing               |
+-----------------------------------------------------------------------------
 """
 
 import sys

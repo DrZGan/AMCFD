@@ -2,6 +2,15 @@
 Test script for boundary conditions module
 
 This tests the bound_condition function with a simple setup.
+
+Test Summary:
+-----------------------------------------------------------------------------
+| Test                            | Purpose                                  |
+-----------------------------------------------------------------------------
+| test_velocity_boundary_conditions| Tests velocity BCs at domain boundaries |
+| test_enthalpy_boundary_conditions| Tests enthalpy BCs at domain boundaries |
+| test_marangoni_effect           | Tests Marangoni (surface tension) effect|
+-----------------------------------------------------------------------------
 """
 
 import taichi as ti

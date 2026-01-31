@@ -1,5 +1,16 @@
 """
 Tests for entot.py - Enthalpy to Temperature conversion.
+
+Test Summary:
+-----------------------------------------------------------------------------
+| Test                        | Purpose                                      |
+-----------------------------------------------------------------------------
+| test_temp_to_enthalpy_solid | Tests solid phase enthalpy calculation       |
+| test_temp_to_enthalpy_all_  | Tests enthalpy calculation for all phases    |
+|   phases                    | (solid, mushy, liquid)                       |
+| test_enthalpy_to_temp_kernel| Tests Taichi kernel for H->T conversion      |
+| test_roundtrip_conversion   | Tests T->H->T roundtrip consistency          |
+-----------------------------------------------------------------------------
 """
 
 import sys
