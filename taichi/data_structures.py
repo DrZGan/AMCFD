@@ -305,6 +305,11 @@ class DiscretCoeffs:
         self.ab = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.su = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
         self.sp = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
+        
+        # Velocity correction coefficients (for SIMPLE algorithm)
+        self.dux = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
+        self.dvy = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
+        self.dwz = ti.field(dtype=ti.f64, shape=(ni, nj, nk))
 
 
 @ti.data_oriented

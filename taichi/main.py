@@ -28,12 +28,10 @@ from data_structures import (
 from param import parse_input
 from toolpath import load_toolpath, read_coordinates as toolpath_read_coordinates
 from geom import get_gridparams
-<<<<<<< HEAD
 from bound import bound_condition
-=======
 from entot import enthalpy_to_temp as entot_enthalpy_to_temp
 from dimen import pool_size, clean_uvw
->>>>>>> 7694ccf48a9a48078b525656a3023f49f25a62c1
+from revise import revision_p as revise_revision_p
 
 # TODO: These modules will be created from corresponding .f90 files
 # from initialization import initialize
@@ -214,10 +212,15 @@ def revision_p(state: State, coeffs: DiscretCoeffs, grid: GridParams,
     
     Corrects pressure and velocities using SIMPLE algorithm.
     
+    NOTE: This is now imported from revise.py module.
+    The actual function signature requires additional parameters (ivar, physics, domain bounds).
+    This wrapper is kept for compatibility but needs updating in the main loop.
+    
     Returns:
         state: Updated state with corrected pressure and velocities
     """
-    # TODO: Implement SIMPLE pressure-velocity coupling
+    # This needs to be called with proper parameters in the main loop
+    # For now, return unchanged state
     return state
 
 
