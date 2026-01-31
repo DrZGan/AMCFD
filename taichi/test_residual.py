@@ -3,6 +3,18 @@ Test residuals: Verify residual.py matches Fortran mod_resid.f90 logic
 
 Constructs synthetic fields and coefficients, computes expected residuals
 per the Fortran equations, and compares with compute_residuals().
+
+Test Summary:
+-----------------------------------------------------------------------------
+| Test                                    | Purpose                          |
+-----------------------------------------------------------------------------
+| test_velocity_residuals_match_fortran   | Verifies velocity residual       |
+|                                         | calculation matches Fortran      |
+| test_energy_residual_matches_fortran    | Verifies energy residual         |
+|                                         | calculation matches Fortran      |
+| test_mass_residual_normalization_       | Verifies mass residual           |
+|   matches_fortran                       | normalization matches Fortran    |
+-----------------------------------------------------------------------------
 """
 
 import sys

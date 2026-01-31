@@ -1,5 +1,13 @@
 """
 Tests for geom.py - Grid generation and geometry.
+
+Test Summary:
+-----------------------------------------------------------------------------
+| Test                    | Purpose                                          |
+-----------------------------------------------------------------------------
+| test_get_gridparams     | Tests grid parameter extraction from YAML        |
+| test_grid_field_shapes  | Tests that grid fields have correct shapes       |
+-----------------------------------------------------------------------------
 """
 
 import sys

@@ -1,5 +1,18 @@
 """
 Tests for toolpath.py - Toolpath loading and coordinate tracking.
+
+Test Summary:
+-----------------------------------------------------------------------------
+| Test                    | Purpose                                          |
+-----------------------------------------------------------------------------
+| test_load_toolpath      | Tests loading toolpath from .crs file            |
+| test_empty_toolpath     | Tests handling of empty/missing toolpath file    |
+| test_get_current_segment| Tests finding current segment from time          |
+| test_interpolate_position| Tests position interpolation along toolpath     |
+| test_read_coordinates   | Tests reading coordinates at given time          |
+| test_coordinate_history | Tests CoordinateHistory tracking class           |
+| test_calc_rhf           | Tests radial heat flux calculation               |
+-----------------------------------------------------------------------------
 """
 
 import sys

@@ -2,6 +2,18 @@
 Test module for dimen.py - Melt Pool Dimensions
 
 Tests the pool_size and clean_uvw functions with synthetic data.
+
+Test Summary:
+-----------------------------------------------------------------------------
+| Test                    | Purpose                                          |
+-----------------------------------------------------------------------------
+| test_pool_size_no_melt  | Tests pool_size when temperature is below        |
+|                         | solidus (no melt pool)                           |
+| test_pool_size_with_melt| Tests pool_size with a synthetic melt pool       |
+| test_clean_uvw          | Tests clean_uvw to zero velocities in solid      |
+|                         | regions                                          |
+| test_utility_functions  | Tests compute_pool_volume and find_max_velocity  |
+-----------------------------------------------------------------------------
 """
 
 import numpy as np

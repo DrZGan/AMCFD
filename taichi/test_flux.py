@@ -2,6 +2,15 @@
 Test script for flux.py module.
 
 Verifies that the HeatFluxCalculator and heat_fluxes function work correctly.
+
+Test Summary:
+-----------------------------------------------------------------------------
+| Test                      | Purpose                                        |
+-----------------------------------------------------------------------------
+| test_flux_calculator      | Tests HeatFluxCalculator with synthetic data   |
+| test_zero_flux            | Tests zero flux conditions (no laser, uniform T)|
+| test_fortran_index_mapping| Tests index mapping consistency with Fortran   |
+-----------------------------------------------------------------------------
 """
 
 import taichi as ti

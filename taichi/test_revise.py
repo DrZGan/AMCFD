@@ -2,6 +2,22 @@
 Test module for revise.py - Pressure-Velocity Coupling
 
 Tests the revision_p function with synthetic data.
+
+Test Summary:
+-----------------------------------------------------------------------------
+| Test                              | Purpose                                |
+-----------------------------------------------------------------------------
+| test_revision_p_skip_non_pressure | Verifies revision_p only runs for     |
+|                                   | ivar=4 (pressure)                     |
+| test_velocity_correction          | Checks velocities are corrected based |
+|                                   | on pressure gradients                 |
+| test_pressure_update              | Validates pressure update with        |
+|                                   | under-relaxation                      |
+| test_solid_region_no_correction   | Ensures solid regions are excluded    |
+|                                   | from corrections                      |
+| test_divergence_reduction         | Tests that pressure correction        |
+|                                   | reduces velocity divergence           |
+-----------------------------------------------------------------------------
 """
 
 import numpy as np
