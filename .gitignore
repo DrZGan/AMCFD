@@ -1,47 +1,17 @@
-# Compiled object files
+# Fortran build artifacts
 *.o
-
-# Fortran module files (compiler-generated)
 *.mod
+**/cluster_main
+**/cluster_main*
+-fopenmp
+1
 
-# Python bytecode and cache
-*.pyc
-*.pyo
-__pycache__/
-*.py[cod]
-*$py.class
+# Fortran temp files
+fort.*
 
-# Python virtual environments
-taichi_env/
-venv/
-.venv/
-env/
+# Simulation output
+**/result/output.txt
+**/result/*.vtk
 
-# Executables
-main
-main_omp
-cluster_main
-
-# Tecplot output files
-*.tec
-
-# Result/output files
-result/*.tec
-result/*.txt
-
-# Backup files
-*.bak
-*~
-*.f90~
-
-# Log files
-*.log
-
-# Editor files
-.vscode/
-*.swp
-*.swo
-
-# OS files
-.DS_Store
-Thumbs.db
+# Utility scripts
+run_both.sh
