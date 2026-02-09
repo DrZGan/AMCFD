@@ -14,46 +14,44 @@ module boundary
 	contains
 
 !********************************************************************
-subroutine bound_u
-	integer i,j,k
-	real(wp) dtdx,fraclu,visu1,term1
+! Generic u/v boundary condition (replaces bound_u, bound_v)
+! idir: 1=u, 2=v
+!********************************************************************
+subroutine bound_uv(idir)
+	integer, intent(in) :: idir
+	integer i,j
+	real(wp) dtd,fracl_stag,vis1,term1
 
 !-----k=nk (Marangoni stress on top surface)
 	do j=jstat,jend
 	do i=istatp1,iendm1
-		dtdx=(temp(i,j,nk)-temp(i-1,j,nk))*dxpwinv(i)
-		fraclu=fracl(i,j,nk)*(1.0-fracx(i-1))+fracl(i-1,j,nk)*fracx(i-1)
-		visu1 = harmonic_mean(vis(i,j,nkm1), vis(i-1,j,nkm1), 1.0-fracx(i-1))
-		term1=fraclu*dgdt*dtdx/(visu1*dzpbinv(nk))
-		uVel(i,j,nk)=uVel(i,j,nkm1)+term1
+		select case(idir)
+		case(1)
+			dtd=(temp(i,j,nk)-temp(i-1,j,nk))*dxpwinv(i)
+			fracl_stag=fracl(i,j,nk)*(1.0-fracx(i-1))+fracl(i-1,j,nk)*fracx(i-1)
+			vis1 = harmonic_mean(vis(i,j,nkm1), vis(i-1,j,nkm1), 1.0-fracx(i-1))
+			term1=fracl_stag*dgdt*dtd/(vis1*dzpbinv(nk))
+			uVel(i,j,nk)=uVel(i,j,nkm1)+term1
+		case(2)
+			dtd=(temp(i,j,nk)-temp(i,j-1,nk))*dypsinv(j)
+			fracl_stag=fracl(i,j,nk)*(1.0-fracy(j-1))+fracl(i,j-1,nk)*fracy(j-1)
+			vis1 = harmonic_mean(vis(i,j,nkm1), vis(i,j-1,nkm1), 1.0-fracy(j-1))
+			term1=fracl_stag*dgdt*dtd/(vis1*dzpbinv(nk))
+			vVel(i,j,nk)=vVel(i,j,nkm1)+term1
+		end select
 	enddo
 	enddo
 
 !----- in solid (boundary conditions)
-	uVel(istat,jstat:jend,kstat:nkm1)=0.0
-	uVel(iend,jstat:jend,kstat:nkm1)=0.0
-end subroutine bound_u
-
-!********************************************************************
-subroutine bound_v
-	integer i,j,k
-	real(wp) dtdy,fraclv,visv1,term1
-
-!-----k=nk (Marangoni stress on top surface)
-	do j=jstat,jend
-	do i=istatp1,iendm1
-		dtdy=(temp(i,j,nk)-temp(i,j-1,nk))*dypsinv(j)
-		fraclv=fracl(i,j,nk)*(1.0-fracy(j-1))+fracl(i,j-1,nk)*fracy(j-1)
-		visv1 = harmonic_mean(vis(i,j,nkm1), vis(i,j-1,nkm1), 1.0-fracy(j-1))
-		term1=fraclv*dgdt*dtdy/(visv1*dzpbinv(nk))
-		vVel(i,j,nk)=vVel(i,j,nkm1)+term1
-	enddo
-	enddo
-
-!-----in solid
-	vVel(istat,jstat:jend,kstat:nkm1)=0.0
-	vVel(iend,jstat:jend,kstat:nkm1)=0.0
-end subroutine bound_v
+	select case(idir)
+	case(1)
+		uVel(istat,jstat:jend,kstat:nkm1)=0.0
+		uVel(iend,jstat:jend,kstat:nkm1)=0.0
+	case(2)
+		vVel(istat,jstat:jend,kstat:nkm1)=0.0
+		vVel(iend,jstat:jend,kstat:nkm1)=0.0
+	end select
+end subroutine bound_uv
 
 !********************************************************************
 subroutine bound_w

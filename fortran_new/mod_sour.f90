@@ -31,157 +31,93 @@ subroutine zero_solid_coefficients(i,j,k)
 end subroutine zero_solid_coefficients
 
 !*********************************************************************
-subroutine source_u
-	integer i,j,k
-	real(wp) fraclu,term,tulc
-
-	do k=kstat,nkm1
-!$OMP PARALLEL PRIVATE(fraclu,term)
-!$OMP DO
-	do j=jstat,jend
-	do i=istatp1,iendm1
-		fraclu=fracl(i,j,k)*(1.0-fracx(i-1))+fracl(i-1,j,k)*fracx(i-1)
-		if(fraclu.gt.0) then
-!------mushy zone (Darcy resistance)--------
-			term = darcy_resistance(viscos, fraclu)
-			sp(i,j,k)=sp(i,j,k)-term*volume_u(i,j,k)
-		endif
-	enddo
-	enddo
-!$OMP END PARALLEL
-	enddo
-
-!-----k=nk ------
-	do j=jstat,jend
-	do i=istatp1,iendm1
-		su(i,j,nkm1)=su(i,j,nkm1)+at(i,j,nkm1)*uVel(i,j,nk)
-		sp(i,j,nkm1)=sp(i,j,nkm1)-at(i,j,nkm1)
-		at(i,j,nkm1)=0.0
-	enddo
-	enddo
-
-!-----assembly and under-relaxation-------------------------------------
-	do k=kstat,nkm1
-!$OMP PARALLEL PRIVATE(tulc)
-!$OMP DO
-	do j=jstat,jend
-	do i=istatp1,iendm1
-		ap(i,j,k)=an(i,j,k)+as(i,j,k)+ae(i,j,k)+aw(i,j,k)+at(i,j,k)+ab(i,j,k)+apnot(i,j,k)-sp(i,j,k)
-		dux(i,j,k)=areajk(j,k)/ap(i,j,k)
-!-----under-relaxation
-		ap(i,j,k)=ap(i,j,k)/urfu
-		su(i,j,k)=su(i,j,k)+(1.-urfu)*ap(i,j,k)*uVel(i,j,k)
-		dux(i,j,k)=dux(i,j,k)*urfu
-!------zero velocity in solid-------
-		tulc=min(temp(i,j,k),temp(i-1,j,k))
-		if(tulc.le.tsolid) then
-			call zero_solid_coefficients(i,j,k)
-		endif
-	enddo
-	enddo
-!$OMP END PARALLEL
-	enddo
-end subroutine source_u
-
+! Generic momentum source term (replaces source_u, source_v, source_w)
+! idir: 1=u, 2=v, 3=w
 !*********************************************************************
-subroutine source_v
+subroutine source_momentum(idir)
+	integer, intent(in) :: idir
 	integer i,j,k
-	real(wp) fraclv,term,tvlc
+	real(wp) fracl_stag,term,tw,tlc
 
+!-----Darcy resistance in mushy zone-----
 	do k=kstat,nkm1
-!$OMP PARALLEL PRIVATE(fraclv,term)
+!$OMP PARALLEL PRIVATE(fracl_stag, term, tw)
 !$OMP DO
 	do j=jstat,jend
 	do i=istatp1,iendm1
-		fraclv=fracl(i,j,k)*(1.0-fracy(j-1))+fracl(i,j-1,k)*fracy(j-1)
-		if(fraclv.gt.0) then
-!------mushy zone (Darcy resistance)--------------------
-			term = darcy_resistance(viscos, fraclv)
-			sp(i,j,k)=sp(i,j,k)-term*volume_v(i,j,k)
+		select case(idir)
+		case(1); fracl_stag=fracl(i,j,k)*(1.0-fracx(i-1))+fracl(i-1,j,k)*fracx(i-1)
+		case(2); fracl_stag=fracl(i,j,k)*(1.0-fracy(j-1))+fracl(i,j-1,k)*fracy(j-1)
+		case(3); fracl_stag=fracl(i,j,k)*(1.0-fracz(k-1))+fracl(i,j,k-1)*fracz(k-1)
+		end select
+		if(fracl_stag.gt.0) then
+!------mushy zone (Darcy resistance)--------
+			term = darcy_resistance(viscos, fracl_stag)
+			select case(idir)
+			case(1); sp(i,j,k)=sp(i,j,k)-term*volume_u(i,j,k)
+			case(2); sp(i,j,k)=sp(i,j,k)-term*volume_v(i,j,k)
+			case(3)
+				sp(i,j,k)=sp(i,j,k)-term*volume_w(i,j,k)
+!-----buoyancy (w only)----------------
+				tw=temp(i,j,k)*(1.0-fracz(k-1))+temp(i,j,k-1)*fracz(k-1)
+				su(i,j,k) = su(i,j,k)+boufac*volume_w(i,j,k)*(tw-tsolid)
+			end select
 		endif
 	enddo
 	enddo
 !$OMP END PARALLEL
 	enddo
 
-!---k=nk---------
-	do j=jstat,jend
-	do i=istatp1,iendm1
-		su(i,j,nkm1)=su(i,j,nkm1)+at(i,j,nkm1)*vVel(i,j,nk)
-		sp(i,j,nkm1)=sp(i,j,nkm1)-at(i,j,nkm1)
-		at(i,j,nkm1)=0.0
-	enddo
-	enddo
+!-----top boundary treatment (u and v only)-----
+	if(idir.eq.1 .or. idir.eq.2) then
+		do j=jstat,jend
+		do i=istatp1,iendm1
+			select case(idir)
+			case(1); su(i,j,nkm1)=su(i,j,nkm1)+at(i,j,nkm1)*uVel(i,j,nk)
+			case(2); su(i,j,nkm1)=su(i,j,nkm1)+at(i,j,nkm1)*vVel(i,j,nk)
+			end select
+			sp(i,j,nkm1)=sp(i,j,nkm1)-at(i,j,nkm1)
+			at(i,j,nkm1)=0.0
+		enddo
+		enddo
+	endif
 
 !-----assembly and under-relaxation-------------------------------------
 	do k=kstat,nkm1
-!$OMP PARALLEL PRIVATE(tvlc)
+!$OMP PARALLEL PRIVATE(tlc)
 !$OMP DO
 	do j=jstat,jend
 	do i=istatp1,iendm1
 		ap(i,j,k)=an(i,j,k)+as(i,j,k)+ae(i,j,k)+aw(i,j,k)+at(i,j,k)+ab(i,j,k)+apnot(i,j,k)-sp(i,j,k)
-		dvy(i,j,k)=areaik(i,k)/ap(i,j,k)
-!-----under-relaxation--------
-		ap(i,j,k)=ap(i,j,k)/urfv
-		su(i,j,k)=su(i,j,k)+(1.-urfv)*ap(i,j,k)*vVel(i,j,k)
-		dvy(i,j,k)=dvy(i,j,k)*urfv
-!------zero velocity in solid------------
-		tvlc=min(temp(i,j,k),temp(i,j-1,k))
-		if(tvlc.le.tsolid) then
+		select case(idir)
+		case(1)
+			dux(i,j,k)=areajk(j,k)/ap(i,j,k)
+			ap(i,j,k)=ap(i,j,k)/urfu
+			su(i,j,k)=su(i,j,k)+(1.-urfu)*ap(i,j,k)*uVel(i,j,k)
+			dux(i,j,k)=dux(i,j,k)*urfu
+			tlc=min(temp(i,j,k),temp(i-1,j,k))
+		case(2)
+			dvy(i,j,k)=areaik(i,k)/ap(i,j,k)
+			ap(i,j,k)=ap(i,j,k)/urfv
+			su(i,j,k)=su(i,j,k)+(1.-urfv)*ap(i,j,k)*vVel(i,j,k)
+			dvy(i,j,k)=dvy(i,j,k)*urfv
+			tlc=min(temp(i,j,k),temp(i,j-1,k))
+		case(3)
+			dwz(i,j,k)=areaij(i,j)/ap(i,j,k)
+			ap(i,j,k)=ap(i,j,k)/urfw
+			su(i,j,k)=su(i,j,k)+(1.-urfw)*ap(i,j,k)*wVel(i,j,k)
+			dwz(i,j,k)=dwz(i,j,k)*urfw
+			tlc=min(temp(i,j,k),temp(i,j,k-1))
+		end select
+!------zero velocity in solid-------
+		if(tlc.le.tsolid) then
 			call zero_solid_coefficients(i,j,k)
 		endif
 	enddo
 	enddo
 !$OMP END PARALLEL
 	enddo
-end subroutine source_v
-
-!********************************************************************
-subroutine source_w
-	integer i,j,k
-	real(wp) fraclw,term,tw,twlc
-
-	do k=kstat,nkm1
-!$OMP PARALLEL PRIVATE(fraclw,term,tw)
-!$OMP DO
-	do j=jstat,jend
-	do i=istatp1,iendm1
-		fraclw=fracl(i,j,k)*(1.0-fracz(k-1))+fracl(i,j,k-1)*fracz(k-1)
-		if(fraclw.gt.0) then
-!------mushy zone (Darcy resistance)----------------
-			term = darcy_resistance(viscos, fraclw)
-			sp(i,j,k)=sp(i,j,k)-term*volume_w(i,j,k)
-!-----buoyancy----------------
-			tw=temp(i,j,k)*(1.0-fracz(k-1))+temp(i,j,k-1)*fracz(k-1)
-			su(i,j,k) = su(i,j,k)+boufac*volume_w(i,j,k)*(tw-tsolid)
-		endif
-	enddo
-	enddo
-!$OMP END PARALLEL
-	enddo
-
-!-----assembly and under-relaxation-----------------------------------
-	do k=kstat,nkm1
-!$OMP PARALLEL PRIVATE(twlc)
-!$OMP DO
-	do j=jstat,jend
-	do i=istatp1,iendm1
-		ap(i,j,k)=an(i,j,k)+as(i,j,k)+ae(i,j,k)+aw(i,j,k)+at(i,j,k)+ab(i,j,k)+apnot(i,j,k)-sp(i,j,k)
-		dwz(i,j,k)=areaij(i,j)/ap(i,j,k)
-!-----under-relaxation--------------
-		ap(i,j,k)=ap(i,j,k)/urfw
-		su(i,j,k)=su(i,j,k)+(1.-urfw)*ap(i,j,k)*wVel(i,j,k)
-		dwz(i,j,k)=dwz(i,j,k)*urfw
-!------zero velocity in solid---------
-		twlc=min(temp(i,j,k),temp(i,j,k-1))
-		if(twlc.le.tsolid) then
-			call zero_solid_coefficients(i,j,k)
-		endif
-	enddo
-	enddo
-!$OMP END PARALLEL
-	enddo
-end subroutine source_w
+end subroutine source_momentum
 
 !********************************************************************
 subroutine source_pp

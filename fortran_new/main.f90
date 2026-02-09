@@ -77,23 +77,23 @@ program main
 				call cleanuvw
 
 !-----solve u-momentum (formerly ivar=1)-----
-				call bound_u
-				call discretize_u
-				call source_u
+				call bound_uv(1)
+				call discretize_momentum(1)
+				call source_momentum(1)
 				call calc_momentum_residual(uVel, resoru, .true.)
 				call solution_uvw(uVel)
 
 !-----solve v-momentum (formerly ivar=2)-----
-				call bound_v
-				call discretize_v
-				call source_v
+				call bound_uv(2)
+				call discretize_momentum(2)
+				call source_momentum(2)
 				call calc_momentum_residual(vVel, resorv, .false.)
 				call solution_uvw(vVel)
 
 !-----solve w-momentum (formerly ivar=3)-----
 				call bound_w
-				call discretize_w
-				call source_w
+				call discretize_momentum(3)
+				call source_momentum(3)
 				call calc_momentum_residual(wVel, resorw, .false.)
 				call solution_uvw(wVel)
 
