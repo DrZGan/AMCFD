@@ -11,10 +11,10 @@ module convergence
 subroutine enhance_converge_speed   
 	implicit none
 	integer i,j,k
-	real(wp) bl,blp,blm,blc       
-	real(wp) pib,qib,denom,delh      !Defination method from F77,  denom is real, others are arraies with the length of nx
-		
-	dimension bl(nx), blp(nx), blm(nx), blc(nx), delh(nx), pib(nx),qib(nx)
+	real(wp), allocatable :: bl(:),blp(:),blm(:),blc(:),delh(:),pib(:),qib(:)
+	real(wp) denom
+
+	allocate(bl(ni), blp(ni), blm(ni), blc(ni), delh(ni), pib(ni), qib(ni))
 
 
 
@@ -66,6 +66,8 @@ subroutine enhance_converge_speed
 	enddo
 !$OMP END PARALLEL
 	enddo
+
+	deallocate(bl, blp, blm, blc, delh, pib, qib)
 	return
 
 end subroutine enhance_converge_speed

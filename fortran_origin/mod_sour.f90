@@ -22,9 +22,6 @@ module source
 	real tulc,tvlc,twlc
 	real flew,flns,fltb
 
-	real alasetavol_rhf, sourcerad_rhf, sourcedepth_rhf
-	
-
 	go to (100,200,300,400,500) ivar
 
 !*********************************************************************
@@ -250,12 +247,6 @@ module source
 !********************************************************************
 500	continue
 
-
-sourcedepth_rhf=sourcedepth*(RHF)**2
-alasetavol_rhf=sourcedepth_rhf*3700  !3204
-sourcerad_rhf=sourcedepth_rhf*0.37  !0.29
-
-
 !-----source term------
 	do k=2,nkm1
 !$OMP PARALLEL 
@@ -265,9 +256,9 @@ sourcerad_rhf=sourcedepth_rhf*0.37  !0.29
 
 		if(toolmatrix(PathNum,5) .gt. 0.5)then
 			
-				 if(z(nk)-z(k).le.sourcedepth_rhf) then
-				 	sourceinput(i,j,k)=alaspowvol*alasfact/pi/sourcerad_rhf**2/sourcedepth_rhf*alasetavol_rhf*&
-				 	exp(-alasfact/sourcerad_rhf**2*((beam_pos-x(i))**2+(beam_posy-y(j))**2))
+				 if(z(nk)-z(k).le.sourcedepth) then
+				 	sourceinput(i,j,k)=alaspowvol*alasfact/pi/sourcerad**2/sourcedepth*alasetavol*&
+				 	exp(-alasfact/sourcerad**2*((beam_pos-x(i))**2+(beam_posy-y(j))**2))
 				 else
 				 	sourceinput(i,j,k)=0.0
 				 endif

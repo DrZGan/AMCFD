@@ -12,9 +12,16 @@ module source
 	use cfd_utils
 	implicit none
 
-	real(wp) sourceinput(nx,ny,nz)
+	real(wp), allocatable :: sourceinput(:,:,:)
 
 	contains
+
+!********************************************************************
+subroutine allocate_source(nni, nnj, nnk)
+	integer, intent(in) :: nni, nnj, nnk
+	if (allocated(sourceinput)) deallocate(sourceinput)
+	allocate(sourceinput(nni, nnj, nnk))
+end subroutine allocate_source
 
 !*********************************************************************
 subroutine zero_solid_coefficients(i,j,k)
@@ -159,11 +166,6 @@ end subroutine source_pp
 subroutine source_enthalpy
 	integer i,j,k
 	real(wp) volht,flew,flns,fltb
-	real(wp) alasetavol_rhf, sourcerad_rhf, sourcedepth_rhf
-
-	sourcedepth_rhf=sourcedepth*(RHF)**2
-	alasetavol_rhf=sourcedepth_rhf*3700
-	sourcerad_rhf=sourcedepth_rhf*0.37
 
 !-----source term + latent heat (merged into one pass for better cache use)------
 	do k=2,nkm1
@@ -172,9 +174,9 @@ subroutine source_enthalpy
 	do j=2,njm1
 	do i=2,nim1
 		if(toolmatrix(PathNum,5) .gt. laser_on_threshold)then
-			if(z(nk)-z(k).le.sourcedepth_rhf) then
-				sourceinput(i,j,k)=alaspowvol*alasfact/pi/sourcerad_rhf**2/sourcedepth_rhf*alasetavol_rhf*&
-				exp(-alasfact/sourcerad_rhf**2*((beam_pos-x(i))**2+(beam_posy-y(j))**2))
+			if(z(nk)-z(k).le.sourcedepth) then
+				sourceinput(i,j,k)=alaspowvol*alasfact/pi/sourcerad**2/sourcedepth*alasetavol*&
+				exp(-alasfact/sourcerad**2*((beam_pos-x(i))**2+(beam_posy-y(j))**2))
 			else
 				sourceinput(i,j,k)=0.0_wp
 			endif

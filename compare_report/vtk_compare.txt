@@ -1,0 +1,44 @@
+VTK comparison: sums of T, Velocity, den, diff, solidID, vis (origin vs new)
+
+  vtkmov1.vtk  npts=1200000
+      T         sum_origin=3.521730e+08  sum_new=3.521741e+08  rel_diff=3.267e-06
+      Velocity  sum_origin=2.882508e+01  sum_new=2.853185e+01  rel_diff=1.017e-02
+      den       sum_origin=9.470634e+09  sum_new=9.470636e+09  rel_diff=2.387e-07
+      diff      sum_origin=2.468476e+04  sum_new=2.468481e+04  rel_diff=1.790e-06
+      solidID   sum_origin=1.380000e+02  sum_new=1.380000e+02  rel_diff=0.000e+00
+      vis       sum_origin=1.199836e+16  sum_new=1.199835e+16  rel_diff=8.334e-07
+
+  vtkmov2.vtk  npts=1200000
+      T         sum_origin=3.527652e+08  sum_new=3.527647e+08  rel_diff=1.447e-06
+      Velocity  sum_origin=6.567859e+01  sum_new=6.776356e+01  rel_diff=3.175e-02
+      den       sum_origin=9.470944e+09  sum_new=9.470954e+09  rel_diff=1.110e-06
+      diff      sum_origin=2.469539e+04  sum_new=2.469551e+04  rel_diff=4.845e-06
+      solidID   sum_origin=3.320000e+02  sum_new=3.340000e+02  rel_diff=6.024e-03
+      vis       sum_origin=1.199662e+16  sum_new=1.199659e+16  rel_diff=2.501e-06
+
+  vtkmov3.vtk  npts=1200000
+      T         sum_origin=3.533928e+08  sum_new=3.533914e+08  rel_diff=3.936e-06
+      Velocity  sum_origin=9.022661e+01  sum_new=9.167808e+01  rel_diff=1.609e-02
+      den       sum_origin=9.471236e+09  sum_new=9.471255e+09  rel_diff=2.007e-06
+      diff      sum_origin=2.470654e+04  sum_new=2.470673e+04  rel_diff=7.434e-06
+      solidID   sum_origin=5.240000e+02  sum_new=5.280000e+02  rel_diff=7.634e-03
+      vis       sum_origin=1.199526e+16  sum_new=1.199521e+16  rel_diff=4.168e-06
+
+  vtkmov4.vtk  npts=1200000
+      T         sum_origin=3.540603e+08  sum_new=3.540551e+08  rel_diff=1.487e-05
+      Velocity  sum_origin=1.141610e+02  sum_new=1.115190e+02  rel_diff=2.314e-02
+      den       sum_origin=9.471565e+09  sum_new=9.471586e+09  rel_diff=2.235e-06
+      diff      sum_origin=2.471869e+04  sum_new=2.471878e+04  rel_diff=3.638e-06
+      solidID   sum_origin=7.220000e+02  sum_new=7.260000e+02  rel_diff=5.540e-03
+      vis       sum_origin=1.199396e+16  sum_new=1.199400e+16  rel_diff=3.335e-06
+
+  vtkmov5.vtk  npts=1200000
+      T         sum_origin=3.547612e+08  sum_new=3.547471e+08  rel_diff=3.982e-05
+      Velocity  sum_origin=1.259871e+02  sum_new=1.194723e+02  rel_diff=5.171e-02
+      den       sum_origin=9.471886e+09  sum_new=9.471915e+09  rel_diff=3.070e-06
+      diff      sum_origin=2.473134e+04  sum_new=2.473132e+04  rel_diff=9.139e-07
+      solidID   sum_origin=9.160000e+02  sum_new=9.200000e+02  rel_diff=4.367e-03
+      vis       sum_origin=1.199272e+16  sum_new=1.199289e+16  rel_diff=1.418e-05
+
+Conclusion: PASS
+Reason: All VTK files have matching npts and sums of T, Velocity, den, diff, solidID, vis within 10% relative difference.

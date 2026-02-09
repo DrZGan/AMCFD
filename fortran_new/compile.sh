@@ -11,12 +11,15 @@ echo "Compiling AM-CFD..."
 
 # Compile all modules and main program
 # Order matters: dependencies must be compiled first
-gfortran -fopenmp -O3 -march=native -mcmodel=large -c \
+gfortran -fopenmp -O3 -march=native -c \
     mod_precision.f90 \
     mod_const.f90 \
     mod_cfd_utils.f90 \
     mod_param.f90 \
     mod_geom.f90 \
+    mod_field_data.f90 \
+    mod_coeff_data.f90 \
+    mod_sim_state.f90 \
     mod_init.f90 \
     mod_laser.f90 \
     mod_dimen.f90 \
@@ -36,7 +39,7 @@ gfortran -fopenmp -O3 -march=native -mcmodel=large -c \
     main.f90
 
 # Link all object files
-gfortran -fopenmp -O3 -march=native -mcmodel=large *.o -o cluster_main
+gfortran -fopenmp -O3 -march=native *.o -o cluster_main
 
 echo "Build complete: cluster_main"
 echo ""

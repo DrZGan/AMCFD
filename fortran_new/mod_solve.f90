@@ -24,11 +24,14 @@ module solver
 ! ilo,ihi: i-direction solve bounds (forward sweep ilo..ihi)
 !********************************************************************
 subroutine tdma_solve_3d(field, klo, khi, jlo, jhi, ibc, ilo, ihi)
-	real(wp), intent(inout) :: field(nx,ny,nz)
+	real(wp), intent(inout) :: field(:,:,:)
 	integer, intent(in) :: klo, khi, jlo, jhi, ibc, ilo, ihi
 
 	integer :: i, j, k, ksweep, jsweep
-	real(wp) :: pr(nx), qr(nx), d, denom
+	real(wp), allocatable :: pr(:), qr(:)
+	real(wp) :: d, denom
+
+	allocate(pr(size(field,1)), qr(size(field,1)))
 
 	do ksweep=1,2
 	do k=khi,klo,-1
@@ -59,6 +62,7 @@ subroutine tdma_solve_3d(field, klo, khi, jlo, jhi, ibc, ilo, ihi)
 	enddo
 	enddo
 	enddo
+	deallocate(pr, qr)
 end subroutine tdma_solve_3d
 
 
@@ -66,25 +70,26 @@ end subroutine tdma_solve_3d
 subroutine tdma_solve_3d_2(field, klo, khi, jlo, jhi, ibc, ilo, ihi)
 	use omp_lib
 	implicit none
-	real(wp), intent(inout) :: field(nx,ny,nz)
+	real(wp), intent(inout) :: field(:,:,:)
 	integer, intent(in) :: klo, khi, jlo, jhi, ibc, ilo, ihi
-  
+
 	integer :: i, j, k, ksweep
-	integer :: nth, tid
+	integer :: nth, tid, nxi
 	real(wp), allocatable :: prbuf(:,:), qrbuf(:,:)   ! per-thread buffers
 	real(wp) :: d, denom
 	integer :: nthreads
-  
+
+	nxi = size(field, 1)
 	! determine number of threads to allocate buffers for
 	!$OMP PARALLEL
 	!$OMP MASTER
 	  nthreads = omp_get_num_threads()
 	!$OMP END MASTER
 	!$OMP END PARALLEL
-  
+
 	if (nthreads < 1) nthreads = 1
-	allocate(prbuf(nx, nthreads))
-	allocate(qrbuf(nx, nthreads))
+	allocate(prbuf(nxi, nthreads))
+	allocate(qrbuf(nxi, nthreads))
   
 	!$OMP PARALLEL DEFAULT(NONE) &
 	!$OMP SHARED(field,prbuf,qrbuf,klo,khi,jlo,jhi,ibc,ilo,ihi,at,ab,an,as,ae,aw,ap,su) &
@@ -135,7 +140,7 @@ subroutine tdma_solve_3d_2(field, klo, khi, jlo, jhi, ibc, ilo, ihi)
 ! Convenience wrappers: call tdma_solve_3d or tdma_solve_3d_2 per use_tdma2
 !********************************************************************
 subroutine solution_uvw(field)
-	real(wp), intent(inout) :: field(nx,ny,nz)
+	real(wp), intent(inout) :: field(:,:,:)
 	if (use_tdma2) then
 		call tdma_solve_3d_2(field, kstat, nkm1, jstat, jend, istat, istatp1, iendm1)
 	else

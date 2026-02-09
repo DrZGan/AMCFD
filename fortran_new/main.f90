@@ -38,7 +38,11 @@ program main
 	call read_data
 	call read_toolpath
 
-	call generate_grid
+	call generate_grid          ! sets ni,nj,nk and allocates geometry
+	call allocate_fields(ni, nj, nk)
+	call allocate_source(ni, nj, nk)
+	call allocate_print(ni, nj, nk)
+	call allocate_laser(ni, nj)
 	call OpenFiles
 	call initialize
 
@@ -56,7 +60,7 @@ program main
 		call cpu_time(t0)
 		call laser_beam
 		call read_coordinates
-		call calcRHF
+!		call calcRHF   ! RHF disabled
 		call cpu_time(t1)
 		t_laser = t_laser + (t1 - t0)
 

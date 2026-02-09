@@ -61,8 +61,8 @@ program main
 
 	call laser_beam
 	call read_coordinates
-	call calcRHF
-	
+!	call calcRHF   ! RHF disabled
+!
 !-----iteration loop----------------Start iteration in each time step, index of GOTO 30
 
 

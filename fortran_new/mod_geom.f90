@@ -7,29 +7,79 @@ module geometry
 	use parameters
 	implicit none
 
-	real(wp) dimx,dimy,dimz	
-	!maximum coordinate values
-	
-	real(wp) x(nx),y(ny),z(nz),xu(nx),yv(ny),zw(nz),dxpwinv(nx),dypsinv(ny),dzpbinv(nz)
-	!    x-value, y-value, z-value, u-value, v-value, z-value, 3 operaters
+	!--------------------------------------------------------------
+	! Derived type: mesh_t (encapsulates all geometry data)
+	!--------------------------------------------------------------
+	type :: mesh_t
+		integer :: ni, nj, nk, nim1, njm1, nkm1
+		real(wp) :: dimx, dimy, dimz
+		! 1D grid arrays
+		real(wp), allocatable :: x(:), y(:), z(:)
+		real(wp), allocatable :: xu(:), yv(:), zw(:)
+		real(wp), allocatable :: dxpwinv(:), dypsinv(:), dzpbinv(:)
+		real(wp), allocatable :: fracx(:), fracy(:), fracz(:)
+		! 3D control volumes
+		real(wp), allocatable :: volume(:,:,:)
+		real(wp), allocatable :: volume_u(:,:,:), volume_v(:,:,:), volume_w(:,:,:)
+		! 2D face areas
+		real(wp), allocatable :: areaij(:,:), areajk(:,:), areaik(:,:)
+		real(wp), allocatable :: areauij(:,:), areauik(:,:)
+		real(wp), allocatable :: areavjk(:,:), areavij(:,:)
+		real(wp), allocatable :: areawik(:,:), areawjk(:,:)
+	contains
+		procedure :: init => mesh_init
+		procedure :: destroy => mesh_destroy
+	end type mesh_t
 
-	real(wp) volume_u(nx,ny,nz),volume_v(nx,ny,nz),volume_w(nx,ny,nz),volume(nx,ny,nz)
-	!volume of CV
+	!--------------------------------------------------------------
+	! Module-level variables (backward compatibility — existing code uses these)
+	!--------------------------------------------------------------
+	real(wp) dimx,dimy,dimz
 
-	real(wp) areaij(nx,ny),areajk(ny,nz),areaik(nx,nz)
-	!area of surface of scalar CV
-		
-	real(wp) areauij(nx,ny),areauik(nx,nz),areavjk(ny,nz),areavij(nx,ny),areawik(nx,nz),areawjk(ny,nz)
-	!area of surface of velocity CV
-	
-	real(wp) fracx(nx),fracy(ny),fracz(nz)
-	!operaters to calcu diffusion coefficient
-		
-	integer ni,nim1,nj,njm1,nk,nkm1 
-	!node num in x-dirction, ni-1,node num in y-dirction, nj-1,node num in z-dirction, nk-1
+	! 1D grid arrays (allocatable, sized to actual grid)
+	real(wp), allocatable :: x(:),y(:),z(:),xu(:),yv(:),zw(:)
+	real(wp), allocatable :: dxpwinv(:),dypsinv(:),dzpbinv(:)
+
+	! 3D control volumes (allocatable)
+	real(wp), allocatable :: volume_u(:,:,:),volume_v(:,:,:),volume_w(:,:,:),volume(:,:,:)
+
+	! 2D face areas (allocatable)
+	real(wp), allocatable :: areaij(:,:),areajk(:,:),areaik(:,:)
+	real(wp), allocatable :: areauij(:,:),areauik(:,:),areavjk(:,:),areavij(:,:),areawik(:,:),areawjk(:,:)
+
+	! 1D interpolation fractions
+	real(wp), allocatable :: fracx(:),fracy(:),fracz(:)
+
+	integer ni,nim1,nj,njm1,nk,nkm1
+	!node num in x-direction, ni-1, y-direction, nj-1, z-direction, nk-1
 			
 
-	contains 
+	contains
+
+!********************************************************************
+subroutine allocate_geometry(nni, nnj, nnk)
+	integer, intent(in) :: nni, nnj, nnk
+	! 1D arrays
+	allocate(x(nni), y(nnj), z(nnk))
+	allocate(xu(nni), yv(nnj), zw(nnk))
+	allocate(dxpwinv(nni), dypsinv(nnj), dzpbinv(nnk))
+	allocate(fracx(nni), fracy(nnj), fracz(nnk))
+	! 3D volumes
+	allocate(volume(nni,nnj,nnk), volume_u(nni,nnj,nnk))
+	allocate(volume_v(nni,nnj,nnk), volume_w(nni,nnj,nnk))
+	! 2D areas
+	allocate(areaij(nni,nnj), areajk(nnj,nnk), areaik(nni,nnk))
+	allocate(areauij(nni,nnj), areauik(nni,nnk))
+	allocate(areavjk(nnj,nnk), areavij(nni,nnj))
+	allocate(areawik(nni,nnk), areawjk(nnj,nnk))
+end subroutine allocate_geometry
+
+!********************************************************************
+subroutine deallocate_geometry()
+	if (allocated(x)) deallocate(x,y,z,xu,yv,zw,dxpwinv,dypsinv,dzpbinv,fracx,fracy,fracz)
+	if (allocated(volume)) deallocate(volume,volume_u,volume_v,volume_w)
+	if (allocated(areaij)) deallocate(areaij,areajk,areaik,areauij,areauik,areavjk,areavij,areawik,areawjk)
+end subroutine deallocate_geometry
 
 !----------------------------------------------------------------------
 ! Generate a 1D non-uniform grid for one coordinate direction.
@@ -74,6 +124,14 @@ end subroutine generate_1d_grid
 subroutine generate_grid
 
 	integer i,j,k
+
+!-----compute grid sizes first (ni,nj,nk)-----
+	ni = 2; do i=1,nzx; ni = ni + ncvx(i); enddo; nim1 = ni - 1
+	nj = 2; do i=1,nzy; nj = nj + ncvy(i); enddo; njm1 = nj - 1
+	nk = 2; do i=1,nzz; nk = nk + ncvz(i); enddo; nkm1 = nk - 1
+
+!-----allocate geometry arrays-----
+	call allocate_geometry(ni, nj, nk)
 
 !----x grid---------------------------------------
 	call generate_1d_grid(nzx, xzone, ncvx, powrx, xu, x, ni, nim1)
@@ -154,4 +212,37 @@ subroutine generate_grid
 
 	return
 end subroutine generate_grid
+
+!********************************************************************
+subroutine mesh_init(self, nni, nnj, nnk)
+	class(mesh_t), intent(inout) :: self
+	integer, intent(in) :: nni, nnj, nnk
+	self%ni = nni; self%nj = nnj; self%nk = nnk
+	self%nim1 = nni-1; self%njm1 = nnj-1; self%nkm1 = nnk-1
+	allocate(self%x(nni), self%y(nnj), self%z(nnk))
+	allocate(self%xu(nni), self%yv(nnj), self%zw(nnk))
+	allocate(self%dxpwinv(nni), self%dypsinv(nnj), self%dzpbinv(nnk))
+	allocate(self%fracx(nni), self%fracy(nnj), self%fracz(nnk))
+	allocate(self%volume(nni,nnj,nnk), self%volume_u(nni,nnj,nnk))
+	allocate(self%volume_v(nni,nnj,nnk), self%volume_w(nni,nnj,nnk))
+	allocate(self%areaij(nni,nnj), self%areajk(nnj,nnk), self%areaik(nni,nnk))
+	allocate(self%areauij(nni,nnj), self%areauik(nni,nnk))
+	allocate(self%areavjk(nnj,nnk), self%areavij(nni,nnj))
+	allocate(self%areawik(nni,nnk), self%areawjk(nnj,nnk))
+end subroutine mesh_init
+
+!********************************************************************
+subroutine mesh_destroy(self)
+	class(mesh_t), intent(inout) :: self
+	if (allocated(self%x)) deallocate(self%x,self%y,self%z)
+	if (allocated(self%xu)) deallocate(self%xu,self%yv,self%zw)
+	if (allocated(self%dxpwinv)) deallocate(self%dxpwinv,self%dypsinv,self%dzpbinv)
+	if (allocated(self%fracx)) deallocate(self%fracx,self%fracy,self%fracz)
+	if (allocated(self%volume)) deallocate(self%volume,self%volume_u,self%volume_v,self%volume_w)
+	if (allocated(self%areaij)) deallocate(self%areaij,self%areajk,self%areaik)
+	if (allocated(self%areauij)) deallocate(self%areauij,self%areauik)
+	if (allocated(self%areavjk)) deallocate(self%areavjk,self%areavij)
+	if (allocated(self%areawik)) deallocate(self%areawik,self%areawjk)
+end subroutine mesh_destroy
+
 end module geometry

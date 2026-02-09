@@ -15,10 +15,8 @@ module constant
 	real(wp), parameter :: powder_threshold = 0.5_wp  ! solidfield threshold for powder region
 	real(wp), parameter :: vis_solid = 1.0e10_wp      ! effective viscosity in solid region
 
-	integer nx,ny,nz,nvar  		!maximum node number at xyz direction, maximum equation number
-	integer nx1,ny1,nz1,ng 		!maximum region number
+	integer nx1,ny1,nz1,ng 		!maximum region number (for zone arrays in mod_param)
 	integer TOOLLINES, COORDLINES
-	parameter (nx=1200,ny=1200,nz=180,nvar=4)
 	parameter (nx1=7,ny1=7,nz1=7,ng=5)
 	parameter (TOOLLINES=1000, COORDLINES=5000)
 	

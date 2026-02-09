@@ -16,7 +16,7 @@ module printing
 	integer itertot,niter  !main   
 
 	real(wp) aAveSec           !how many seconds are needed for each iteration
-	real(wp) auvl(nx,ny,nz),avvl(nx,ny,nz),awvl(nx,ny,nz)  ! velocity field at central nodes
+	real(wp), allocatable :: auvl(:,:,:),avvl(:,:,:),awvl(:,:,:)  ! velocity field at central nodes
 
 	integer, private:: i,j,k,ist,gridx, gridy, gridz ! calcu how many grids should be output in different axis
 	integer, private:: itimestart,itimeend
@@ -25,6 +25,12 @@ module printing
 
 
 	contains
+
+!********************************************************************
+subroutine allocate_print(nni, nnj, nnk)
+	integer, intent(in) :: nni, nnj, nnk
+	allocate(auvl(nni,nnj,nnk), avvl(nni,nnj,nnk), awvl(nni,nnj,nnk))
+end subroutine allocate_print
 
 !********************************************************************
 subroutine StartTime
@@ -233,7 +239,7 @@ end subroutine Cust_Out
 subroutine write_vtk_vector(unit, name, ufield, vfield, wfield)
 	integer, intent(in) :: unit
 	character(len=*), intent(in) :: name
-	real(wp), intent(in) :: ufield(nx,ny,nz), vfield(nx,ny,nz), wfield(nx,ny,nz)
+	real(wp), intent(in) :: ufield(:,:,:), vfield(:,:,:), wfield(:,:,:)
 	integer i,j,k
 	real(kind=4) :: val4
 
@@ -256,7 +262,7 @@ end subroutine write_vtk_vector
 subroutine write_vtk_scalar(unit, name, field)
 	integer, intent(in) :: unit
 	character(len=*), intent(in) :: name
-	real(wp), intent(in) :: field(nx,ny,nz)
+	real(wp), intent(in) :: field(:,:,:)
 	integer i,j,k
 	real(kind=4) :: val4
 

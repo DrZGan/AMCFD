@@ -12,10 +12,18 @@ module laserinput
 	integer istart,jstart,imin,imax,jmin,jmax,kmin,kmax
 	!index of mid-length of melt pool, maximum and minimum indexes of melt pool dimension
 
-	real(wp) heatin(nx,ny), heatinLaser, peakhin, timet
-	!heat flux matrix, heat flux [J/s], peak laser density, time, x-value of central laser beam, y-value of central laser beam
+	real(wp), allocatable :: heatin(:,:)
+	real(wp) heatinLaser, peakhin, timet
 
-	contains 
+	contains
+
+!********************************************************************
+subroutine allocate_laser(nni, nnj)
+	integer, intent(in) :: nni, nnj
+	allocate(heatin(nni, nnj))
+	heatin = 0.0_wp
+end subroutine allocate_laser
+
 
 subroutine laser_beam
 

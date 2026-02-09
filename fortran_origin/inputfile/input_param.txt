@@ -20,7 +20,7 @@
 
 &powder_properties layerheight=0.04e-3, pden=4330, pcpa=0.2508, pcpb=357.7, pthcona=0, pthconb=0.995/
 
-&numerical_relax maxit=50, delt=2e-5,  timax=0.02351189, urfu=0.7, urfv=0.7, urfw=0.7, urfp=0.7, urfh=0.7 /
+&numerical_relax maxit=50, delt=2e-5,  timax=0.0005, urfu=0.7, urfv=0.7, urfw=0.7, urfp=0.7, urfh=0.7 /
 
 &boundary_conditions   htci=5, htcj=5, htck1=5, htckn=5, tempWest=293, tempEast=293, 
 	tempNorth=293,	tempBottom=293,	tempPreheat=293, tempAmb=293  /

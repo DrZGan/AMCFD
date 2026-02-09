@@ -119,6 +119,7 @@ subroutine initialize
 	
 	beam_pos=toolmatrix(PathNum,2)
 	beam_posy=toolmatrix(PathNum,3)
+	RHF=1.0   ! RHF disabled: use 1.0 so source terms use sourcedepth_rhf = sourcedepth, etc.
 
 !------------enthalpy BC: i=1 plane------------inital enthalpy at boundary 
 	do j=1,nj

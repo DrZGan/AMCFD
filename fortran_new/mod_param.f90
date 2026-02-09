@@ -6,6 +6,19 @@ module parameters
 	use constant
 
 	implicit none
+
+	!--------------------------------------------------------------
+	! Derived type: material_t (encapsulates material properties)
+	!--------------------------------------------------------------
+	type :: material_t
+		real(wp) :: dens, denl, viscos, tsolid, tliquid, tboiling
+		real(wp) :: hsmelt, hlfriz, acpa, acpb, acpl
+		real(wp) :: thconsa, thconsb, thconl, beta, emiss, dgdtp
+	end type material_t
+
+	!--------------------------------------------------------------
+	! Module-level variables (backward compatibility)
+	!--------------------------------------------------------------
 	real(wp) alaspow, alaseta, alasrb, alasfact, scanvelx, scanvely
 	real(wp) alaspowvol, alasetavol, sourcerad, sourcedepth
 	real(wp) dens, denl, viscos, tsolid, tliquid, tboiling, hsmelt, hlfriz, acpa, acpb, acpl, &

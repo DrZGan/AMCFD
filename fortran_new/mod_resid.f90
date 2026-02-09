@@ -18,7 +18,7 @@ module residue
 ! Generic momentum residual calculation for u, v, w velocities
 !********************************************************************
 subroutine calc_momentum_residual(vel, resor_out, calc_refmom)
-	real(wp), intent(in) :: vel(nx,ny,nz)
+	real(wp), intent(in) :: vel(:,:,:)
 	real(wp), intent(out) :: resor_out
 	logical, intent(in) :: calc_refmom
 	integer i,j,k

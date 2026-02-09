@@ -114,39 +114,39 @@ end subroutine read_coordinates
 
 
 subroutine calcRHF
-
-	integer i
-	real(wp) disk, tk, Pk, R, T, P0, RHFk, RHFc
-
-	RHFk=0
-	RHF=0
-
-	RHFc=3.176
-	P0=300
-	R=0.2e-3
-	T=2e-3
-	do i = 1, COORDLINES
-
-		if(coordhistory(i,1) .ge. -0.5)then
-
-			disk=sqrt((coordhistory(i,2)-coordhistory(1,2))**2+(coordhistory(i,3)-coordhistory(1,3))**2)
-			tk=coordhistory(1,1)-coordhistory(i,1)
-			if(disk .le. R .and. tk .le. T)then
-				Pk=coordhistory(i,5)
-				RHFk=(R-disk)**2/R**2*(T-tk)/T*Pk/P0
-
-				RHF=RHF+RHFk
-			endif
-		else 
-		 	exit
-		 endif	
-	end do
-
-	RHF=RHF/RHFc
-
-	write(6,20) RHF
-	write(9,20) RHF
-20	format('RHF= ',f8.3,/)
+! RHF disabled: computation and output commented; RHF set to 1.0 in initialize
+!	integer i
+!	real(wp) disk, tk, Pk, R, T, P0, RHFk, RHFc
+!
+!	RHFk=0
+!	RHF=0
+!
+!	RHFc=3.176
+!	P0=300
+!	R=0.2e-3
+!	T=2e-3
+!	do i = 1, COORDLINES
+!
+!		if(coordhistory(i,1) .ge. -0.5)then
+!
+!			disk=sqrt((coordhistory(i,2)-coordhistory(1,2))**2+(coordhistory(i,3)-coordhistory(1,3))**2)
+!			tk=coordhistory(1,1)-coordhistory(i,1)
+!			if(disk .le. R .and. tk .le. T)then
+!				Pk=coordhistory(i,5)
+!				RHFk=(R-disk)**2/R**2*(T-tk)/T*Pk/P0
+!
+!				RHF=RHF+RHFk
+!			endif
+!		else 
+!		 	exit
+!		 endif	
+!	end do
+!
+!	RHF=RHF/RHFc
+! RHF output disabled:
+!	write(6,20) RHF
+!	write(9,20) RHF
+!20	format('RHF= ',f8.3,/)
 
 
 	return

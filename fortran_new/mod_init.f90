@@ -2,73 +2,45 @@
 !
 module initialization
 !______________________________________________________________________________
+! Thin wrapper: re-exports field_data, coeff_data, sim_state for backward compat.
+! Contains allocate_fields, deallocate_fields, and initialize.
 !
 	use geometry
 	use constant
 	use parameters
 	use cfd_utils
+	use field_data
+	use coeff_data
+	use sim_state
 
 	implicit none
 
- 
-	real(wp) dgdt, deltemp,cpavg,hlcal,hlatnt,boufac
- 	!temperature coefficient of surface tension,
-        !temperature difference between solidus and liquidus,
-        !average capacity,
-        !calucation enthalpy,
-        !latent enthalpy,
-        !diffusion of solid,
-        !diffusion of liquid,
-        !bouyancy/temperature rise,
-        !density*scanning speed
-
-	real(wp) vis(nx,ny,nz),diff(nx,ny,nz),den(nx,ny,nz)
-	!viscosity matrix, diffusion matrix, density matrix
-
-	real(wp) uVel(nx,ny,nz),vVel(nx,ny,nz),wVel(nx,ny,nz),unot(nx,ny,nz),vnot(nx,ny,nz),wnot(nx,ny,nz)
-	!uvw velocity matrix, previous time velocity matrix
-		
-	real(wp) pressure(nx,ny,nz),pp(nx,ny,nz),enthalpy(nx,ny,nz),hnot(nx,ny,nz),temp(nx,ny,nz),tnot(nx,ny,nz)
-	!pressure, enthalpy, temperature, and previous pressure, enthalpy, temperature.
-
-	real(wp) dux(nx,ny,nz),dvy(nx,ny,nz),dwz(nx,ny,nz),su(nx,ny,nz),sp(nx,ny,nz)
-	!velocity rise matrix, source term matrix su and sp
-
-	! ivar removed: specific subroutines are called directly from main.f90
-	! phi/equivalence removed: field arrays are passed explicitly to the TDMA solver
-
-	real(wp) fracl(nx,ny,nz),fraclnot(nx,ny,nz)	
-	!volume fraction of liquid matrix, and previous matrix
-	
-
-	real(wp) resorm,refmom,ahtoploss	
-	!  pressure residual error, reference residual error and total heat loss at top surface
-	
-	real(wp) ap(nx,ny,nz),an(nx,ny,nz),as(nx,ny,nz),ae(nx,ny,nz),aw(nx,ny,nz),at(nx,ny,nz),ab(nx,ny,nz), &
-		apnot(nx,ny,nz)	
-
-	real(wp) enthalpyWest,enthalpyEast,enthalpyNorth,enthalpyBottom,enthalpyPreheat
-
-	integer TrackNum, PathNum
-	real(wp) solidfield(nx,ny,nz)
-	real(wp) beam_pos, beam_posy
-	real(wp) toolmatrix(TOOLLINES,5)
-	real(wp) coordhistory(COORDLINES,8)
-	real(wp) RHF
-	
 	contains
 
+!********************************************************************
+subroutine allocate_fields(nni, nnj, nnk)
+	integer, intent(in) :: nni, nnj, nnk
+	call allocate_field_data(nni, nnj, nnk)
+	call allocate_coeff_data(nni, nnj, nnk)
+end subroutine allocate_fields
+
+!********************************************************************
+subroutine deallocate_fields()
+	call deallocate_field_data()
+	call deallocate_coeff_data()
+end subroutine deallocate_fields
+
+!********************************************************************
 subroutine initialize
-		
+
 	integer i,j,k
 !********************************************************************
-	
+
 	dgdt=dgdtp                    !temperature coefficient of surface tension
 	deltemp = tliquid - tsolid    !difference between solidus and liquidus
 	cpavg = (acpa*tsolid+acpb+acpl)*0.5        !average heat capacity
 	hlcal = hsmelt+cpavg*deltemp  !calcu enthalpy at liquidus
 	hlatnt = hlfriz - hlcal       !calcu latent heat
-	!write(*,*) hlatnt
 	boufac = denl*g*beta         !bouyancy factor=density/temperature rise
 
 	enthalpyPreheat = temp_to_enthalpy(tempPreheat, acpa, acpb, acpl, tsolid, tliquid, hsmelt, hlcal, deltemp)
@@ -109,16 +81,17 @@ subroutine initialize
 
 	enddo
 	enddo
-	enddo	
-  
-  	coordhistory(1:COORDLINES,1:8)=-1
+	enddo
+
+	coordhistory(1:COORDLINES,1:8)=-1
 	TrackNum=0
 	PathNum=2
-	
+
 	beam_pos=toolmatrix(PathNum,2)
 	beam_posy=toolmatrix(PathNum,3)
+	RHF=1.0_wp   ! RHF disabled: use 1.0 so source terms use sourcedepth_rhf = sourcedepth, etc.
 
-!------------enthalpy BC: i=1 plane------------inital enthalpy at boundary 
+!------------enthalpy BC: i=1 plane------------inital enthalpy at boundary
 	do j=1,nj
 	do k=1,nk
 		enthalpy(1,j,k)=enthalpyWest
@@ -152,4 +125,3 @@ subroutine initialize
 end subroutine initialize
 
 end module initialization
-
