@@ -21,22 +21,24 @@ subroutine heat_fluxes
 		
 
 !-----i=1 & i=ni-----
-	flux_west=0.0
-	flux_east=0.0
+	flux_west=0.0_wp
+	flux_east=0.0_wp
+!$OMP PARALLEL DO PRIVATE(j, fluxi1, fluxl1) REDUCTION(+:flux_west, flux_east)
 	do k=2,nkm1
 	do j=2,njm1
-		fluxi1=diff(2,j,k)*(enthalpy(1,j,k)-enthalpy(2,j,k))*dxpwinv(2)           
+		fluxi1=diff(2,j,k)*(enthalpy(1,j,k)-enthalpy(2,j,k))*dxpwinv(2)
 		fluxl1=diff(nim1,j,k)*(enthalpy(ni,j,k)-enthalpy(nim1,j,k))*dxpwinv(ni)
-
-		flux_west=flux_west+areajk(j,k)*(fluxi1)         
+		flux_west=flux_west+areajk(j,k)*(fluxi1)
 		flux_east=flux_east+areajk(j,k)*(fluxl1)
 	enddo
 	enddo
+!$OMP END PARALLEL DO
 
 !********************************************************************
 !-----k=nk and k=1------------
-	flux_bottom=0.0
-	flux_top=0.0
+	flux_bottom=0.0_wp
+	flux_top=0.0_wp
+!$OMP PARALLEL DO PRIVATE(i, fluxk1, fluxn1) REDUCTION(+:flux_bottom, flux_top)
 	do j=2,njm1
 	do i=2,nim1
 		fluxk1=diff(i,j,2)*(enthalpy(i,j,1)-enthalpy(i,j,2))*dzpbinv(2)
@@ -45,33 +47,38 @@ subroutine heat_fluxes
 		flux_top=flux_top+areaij(i,j)*fluxn1
 	enddo
 	enddo
+!$OMP END PARALLEL DO
 
 !********************************************************************
 !-----j=1 and j=nj--------
-	flux_north=0.0
-	flux_south=0.0
+	flux_north=0.0_wp
+	flux_south=0.0_wp
+!$OMP PARALLEL DO PRIVATE(i, fluxj1, fluxm1) REDUCTION(+:flux_south, flux_north)
 	do k=2,nkm1
 	do i=2,nim1
-		fluxj1=diff(i,2,k)*(enthalpy(i,1,k)-enthalpy(i,2,k))*dypsinv(2)		
+		fluxj1=diff(i,2,k)*(enthalpy(i,1,k)-enthalpy(i,2,k))*dypsinv(2)
 		fluxm1=diff(i,njm1,k)*(enthalpy(i,nj,k)-enthalpy(i,njm1,k))*dypsinv(nj)
 		flux_south=flux_south+areaik(i,k)*fluxj1
 		flux_north=flux_north+areaik(i,k)*fluxm1
 	enddo
 	enddo
+!$OMP END PARALLEL DO
 
 !********************************************************************
 !-----heat accumulation--------
-		accul=0.0
-		heatvol=0.0
-		do k=2,nkm1
-		do j=2,njm1
-		do i=2,nim1
-			dh1=enthalpy(i,j,k)-hnot(i,j,k)+(fracl(i,j,k)-fraclnot(i,j,k))*hlatnt
-			accul=accul+volume(i,j,k)*den(i,j,k)*dh1/delt
-			heatvol=heatvol+sourceinput(i,j,k)*volume(i,j,k)
-		enddo
-		enddo
-		enddo
+	accul=0.0_wp
+	heatvol=0.0_wp
+!$OMP PARALLEL DO PRIVATE(i, j, dh1) REDUCTION(+:accul, heatvol)
+	do k=2,nkm1
+	do j=2,njm1
+	do i=2,nim1
+		dh1=enthalpy(i,j,k)-hnot(i,j,k)+(fracl(i,j,k)-fraclnot(i,j,k))*hlatnt
+		accul=accul+volume(i,j,k)*den(i,j,k)*dh1/delt
+		heatvol=heatvol+sourceinput(i,j,k)*volume(i,j,k)
+	enddo
+	enddo
+	enddo
+!$OMP END PARALLEL DO
 
 
 !********************************************************************

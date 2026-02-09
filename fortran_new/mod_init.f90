@@ -71,11 +71,11 @@ subroutine initialize
 	!write(*,*) hlatnt
 	boufac = denl*g*beta         !bouyancy factor=density/temperature rise
 
-	enthalpyPreheat = temp_to_enthalpy(tempPreheat, acpa, acpb)  !translate preheat temp to enthalpy at the boundary
-	enthalpyWest = temp_to_enthalpy(tempWest, acpa, acpb)
-	enthalpyEast = temp_to_enthalpy(tempEast, acpa, acpb)
-	enthalpyNorth = temp_to_enthalpy(tempNorth, acpa, acpb)
-	enthalpyBottom = temp_to_enthalpy(tempBottom, acpa, acpb)
+	enthalpyPreheat = temp_to_enthalpy(tempPreheat, acpa, acpb, acpl, tsolid, tliquid, hsmelt, hlcal, deltemp)
+	enthalpyWest = temp_to_enthalpy(tempWest, acpa, acpb, acpl, tsolid, tliquid, hsmelt, hlcal, deltemp)
+	enthalpyEast = temp_to_enthalpy(tempEast, acpa, acpb, acpl, tsolid, tliquid, hsmelt, hlcal, deltemp)
+	enthalpyNorth = temp_to_enthalpy(tempNorth, acpa, acpb, acpl, tsolid, tliquid, hsmelt, hlcal, deltemp)
+	enthalpyBottom = temp_to_enthalpy(tempBottom, acpa, acpb, acpl, tsolid, tliquid, hsmelt, hlcal, deltemp)
 
 	do k=1,nk
 	do j=1,nj

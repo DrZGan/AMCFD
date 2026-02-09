@@ -4,8 +4,8 @@
 
 set -e  # Exit on error
 
-# Clean previous build artifacts
-rm -f *.o *.mod cluster_main
+# Full clean (clean.sh)
+bash clean.sh
 
 echo "Compiling AM-CFD..."
 
@@ -32,6 +32,7 @@ gfortran -fopenmp -O3 -march=native -mcmodel=large -c \
     mod_print.f90 \
     mod_converge.f90 \
     mod_toolpath.f90 \
+    mod_timing.f90 \
     main.f90
 
 # Link all object files

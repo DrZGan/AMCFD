@@ -38,7 +38,10 @@ subroutine source_momentum(idir)
 	integer, intent(in) :: idir
 	integer i,j,k
 	real(wp) fracl_stag,term,tw,tlc
+	real(wp), parameter :: perm_const = 1.0e-10_wp, eps_darcy = 1.0e-3_wp
+	real(wp) darcy_c0
 
+	darcy_c0 = 180.0_wp * viscos / perm_const
 !-----Darcy resistance in mushy zone-----
 	do k=kstat,nkm1
 !$OMP PARALLEL PRIVATE(fracl_stag, term, tw)
@@ -46,13 +49,13 @@ subroutine source_momentum(idir)
 	do j=jstat,jend
 	do i=istatp1,iendm1
 		select case(idir)
-		case(1); fracl_stag=fracl(i,j,k)*(1.0-fracx(i-1))+fracl(i-1,j,k)*fracx(i-1)
-		case(2); fracl_stag=fracl(i,j,k)*(1.0-fracy(j-1))+fracl(i,j-1,k)*fracy(j-1)
-		case(3); fracl_stag=fracl(i,j,k)*(1.0-fracz(k-1))+fracl(i,j,k-1)*fracz(k-1)
+		case(1); fracl_stag=fracl(i,j,k)*(1.0_wp-fracx(i-1))+fracl(i-1,j,k)*fracx(i-1)
+		case(2); fracl_stag=fracl(i,j,k)*(1.0_wp-fracy(j-1))+fracl(i,j-1,k)*fracy(j-1)
+		case(3); fracl_stag=fracl(i,j,k)*(1.0_wp-fracz(k-1))+fracl(i,j,k-1)*fracz(k-1)
 		end select
-		if(fracl_stag.gt.0) then
-!------mushy zone (Darcy resistance)--------
-			term = darcy_resistance(viscos, fracl_stag)
+		if(fracl_stag.gt.0.0_wp) then
+!------mushy zone (Darcy resistance, inlined)--------
+			term = darcy_c0 * (1.0_wp - fracl_stag)**2 / (fracl_stag + eps_darcy)
 			select case(idir)
 			case(1); sp(i,j,k)=sp(i,j,k)-term*volume_u(i,j,k)
 			case(2); sp(i,j,k)=sp(i,j,k)-term*volume_v(i,j,k)
@@ -109,9 +112,16 @@ subroutine source_momentum(idir)
 			dwz(i,j,k)=dwz(i,j,k)*urfw
 			tlc=min(temp(i,j,k),temp(i,j,k-1))
 		end select
-!------zero velocity in solid-------
+!------zero velocity in solid (inlined to avoid call overhead in hot loop)-------
 		if(tlc.le.tsolid) then
-			call zero_solid_coefficients(i,j,k)
+			su(i,j,k)=0.0_wp
+			an(i,j,k)=0.0_wp
+			as(i,j,k)=0.0_wp
+			ae(i,j,k)=0.0_wp
+			aw(i,j,k)=0.0_wp
+			at(i,j,k)=0.0_wp
+			ab(i,j,k)=0.0_wp
+			ap(i,j,k)=great
 		endif
 	enddo
 	enddo
@@ -130,7 +140,14 @@ subroutine source_pp
 	do i=istatp1,iendm1
 		ap(i,j,k)=an(i,j,k)+as(i,j,k)+ae(i,j,k)+aw(i,j,k)+at(i,j,k)+ab(i,j,k)-sp(i,j,k)
 		if(temp(i,j,k).le.tsolid)then
-			call zero_solid_coefficients(i,j,k)
+			su(i,j,k)=0.0_wp
+			an(i,j,k)=0.0_wp
+			as(i,j,k)=0.0_wp
+			ae(i,j,k)=0.0_wp
+			aw(i,j,k)=0.0_wp
+			at(i,j,k)=0.0_wp
+			ab(i,j,k)=0.0_wp
+			ap(i,j,k)=great
 		endif
 	enddo
 	enddo
@@ -148,9 +165,9 @@ subroutine source_enthalpy
 	alasetavol_rhf=sourcedepth_rhf*3700
 	sourcerad_rhf=sourcedepth_rhf*0.37
 
-!-----source term------
+!-----source term + latent heat (merged into one pass for better cache use)------
 	do k=2,nkm1
-!$OMP PARALLEL
+!$OMP PARALLEL PRIVATE(volht, flew, flns, fltb)
 !$OMP DO
 	do j=2,njm1
 	do i=2,nim1
@@ -159,31 +176,20 @@ subroutine source_enthalpy
 				sourceinput(i,j,k)=alaspowvol*alasfact/pi/sourcerad_rhf**2/sourcedepth_rhf*alasetavol_rhf*&
 				exp(-alasfact/sourcerad_rhf**2*((beam_pos-x(i))**2+(beam_posy-y(j))**2))
 			else
-				sourceinput(i,j,k)=0.0
+				sourceinput(i,j,k)=0.0_wp
 			endif
 		else
-			sourceinput(i,j,k)=0.0
+			sourceinput(i,j,k)=0.0_wp
 		endif
 		su(i,j,k)=su(i,j,k)+volume(i,j,k)*sourceinput(i,j,k)
-	enddo
-	enddo
-!$OMP END PARALLEL
-	enddo
-
-!-----latent heat source terms------
-	do k=2,nkm1
-!$OMP PARALLEL PRIVATE(volht, flew, flns, fltb)
-!$OMP DO
-	do j=2,njm1
-	do i=2,nim1
 		volht=volume(i,j,k)*hlatnt*den(i,j,k)/delt
 		su(i,j,k)=su(i,j,k)-volht*(fracl(i,j,k)-fraclnot(i,j,k))
-		flew=areajk(j,k)*(max(uVel(i,j,k),0.0)*fracl(i-1,j,k)-max(-uVel(i,j,k),0.0)*fracl(i,j,k) &
-			+max(-uVel(i+1,j,k),0.0)*fracl(i+1,j,k)-max(uVel(i+1,j,k),0.0)*fracl(i,j,k))
-		flns=areaik(i,k)*(max(vVel(i,j,k),0.0)*fracl(i,j-1,k)-max(-vVel(i,j,k),0.0)*fracl(i,j,k)  &
-			+max(-vVel(i,j+1,k),0.0)*fracl(i,j+1,k)-max(vVel(i,j+1,k),0.0)*fracl(i,j,k))
-		fltb=areaij(i,j)*(max(wVel(i,j,k),0.0)*fracl(i,j,k-1)-max(-wVel(i,j,k),0.0)*fracl(i,j,k) &
-			+max(-wVel(i,j,k+1),0.0)*fracl(i,j,k+1)-max(wVel(i,j,k+1),0.0)*fracl(i,j,k))
+		flew=areajk(j,k)*(max(uVel(i,j,k),0.0_wp)*fracl(i-1,j,k)-max(-uVel(i,j,k),0.0_wp)*fracl(i,j,k) &
+			+max(-uVel(i+1,j,k),0.0_wp)*fracl(i+1,j,k)-max(uVel(i+1,j,k),0.0_wp)*fracl(i,j,k))
+		flns=areaik(i,k)*(max(vVel(i,j,k),0.0_wp)*fracl(i,j-1,k)-max(-vVel(i,j,k),0.0_wp)*fracl(i,j,k)  &
+			+max(-vVel(i,j+1,k),0.0_wp)*fracl(i,j+1,k)-max(vVel(i,j+1,k),0.0_wp)*fracl(i,j,k))
+		fltb=areaij(i,j)*(max(wVel(i,j,k),0.0_wp)*fracl(i,j,k-1)-max(-wVel(i,j,k),0.0_wp)*fracl(i,j,k) &
+			+max(-wVel(i,j,k+1),0.0_wp)*fracl(i,j,k+1)-max(wVel(i,j,k+1),0.0_wp)*fracl(i,j,k))
 		su(i,j,k)=su(i,j,k)+den(i,j,k)*hlatnt*(flew+flns+fltb)
 	enddo
 	enddo
