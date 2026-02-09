@@ -12,8 +12,8 @@ module property
 subroutine properties
 	implicit none
 	integer i,j,k, jind
-	real diffs, diffl
-	real dL_mix, vMag, visT, diffT
+	real(wp) diffs, diffl
+	real(wp) dL_mix, vMag, visT, diffT
 
 	
 

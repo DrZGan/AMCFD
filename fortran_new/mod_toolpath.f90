@@ -116,7 +116,7 @@ end subroutine read_coordinates
 subroutine calcRHF
 
 	integer i
-	real disk, tk, Pk, R, T, P0, RHFk, RHFc
+	real(wp) disk, tk, Pk, R, T, P0, RHFk, RHFc
 
 	RHFk=0
 	RHF=0

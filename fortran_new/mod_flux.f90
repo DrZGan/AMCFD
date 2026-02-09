@@ -11,13 +11,13 @@ module fluxes
 
 
 	implicit none
-	real heatout,flux_west,flux_east,flux_top,flux_bottom,flux_north,flux_south,accul,heatvol,ratio
+	real(wp) heatout,flux_west,flux_east,flux_top,flux_bottom,flux_north,flux_south,accul,heatvol,ratio
 	contains
 	
 subroutine heat_fluxes
 
 	integer i,j,k
-	real fluxi1,fluxl1,fluxk1,fluxn1,fluxm1,fluxj1,dh1
+	real(wp) fluxi1,fluxl1,fluxk1,fluxn1,fluxm1,fluxj1,dh1
 		
 
 !-----i=1 & i=ni-----

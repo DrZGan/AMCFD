@@ -31,7 +31,7 @@ program main
 
 	implicit none
 	integer i,j,k
-	real amaxres
+	real(wp) amaxres
 
 	call read_data
 	call read_toolpath
@@ -60,14 +60,12 @@ program main
 			niter=niter+1
 			itertot=itertot+1
 
-!-----ivar=5------------solve energy equation
-			ivar=5
-
+!-----solve energy equation (formerly ivar=5)-----
 			call properties
-			call bound_condition
-			call discretize
-			call source_term
-			call residual
+			call bound_enthalpy
+			call discretize_enthalpy
+			call source_enthalpy
+			call calc_enthalpy_residual
 
 			call enhance_converge_speed
 			call solution_enthalpy
@@ -78,15 +76,34 @@ program main
 			if(tpeak.gt.tsolid) then
 				call cleanuvw
 
-!-----ivar=1,4------------solve momentum equations
-				do ivar=1,4
-					call bound_condition
-					call discretize
-					call source_term
-					call residual
-					call solution_uvw
-					call revision_p
-				enddo
+!-----solve u-momentum (formerly ivar=1)-----
+				call bound_u
+				call discretize_u
+				call source_u
+				call calc_momentum_residual(uVel, resoru, .true.)
+				call solution_uvw(uVel)
+
+!-----solve v-momentum (formerly ivar=2)-----
+				call bound_v
+				call discretize_v
+				call source_v
+				call calc_momentum_residual(vVel, resorv, .false.)
+				call solution_uvw(vVel)
+
+!-----solve w-momentum (formerly ivar=3)-----
+				call bound_w
+				call discretize_w
+				call source_w
+				call calc_momentum_residual(wVel, resorw, .false.)
+				call solution_uvw(wVel)
+
+!-----solve pressure correction (formerly ivar=4)-----
+				call bound_pp
+				call discretize_pp
+				call source_pp
+				call calc_pressure_residual
+				call solution_uvw(pp)
+				call revision_p
 			endif
 
 !-----convergence criterion------------

@@ -8,7 +8,7 @@ module dimensions
 	use laserinput
 	implicit none
 
-	real alen,depth,width,hpeak,tpeak,umax,vmax,wmax
+	real(wp) alen,depth,width,hpeak,tpeak,umax,vmax,wmax
         !   length, depth, half-width, peak enthalpy, peak temperature, maximum velocity at each direction
 
 	integer	istat,jstat,kstat,iend,jend,istatp1,iendm1  !
@@ -19,8 +19,8 @@ module dimensions
 subroutine pool_size
 
 	integer i,j,k
-	real dtdxxinv,dtdzzinv,dtdyyinv,dep, wid
-	real xxmax,xxmin,yymax,yymin
+	real(wp) dtdxxinv,dtdzzinv,dtdyyinv,dep, wid
+	real(wp) xxmax,xxmin,yymax,yymin
 
 	tpeak=maxval(temp(1:ni,1:nj,1:nk))
 	if(tpeak.le.tsolid) then

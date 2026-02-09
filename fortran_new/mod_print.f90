@@ -15,13 +15,13 @@ module printing
 	implicit none
 	integer itertot,niter  !main   
 
-	real aAveSec           !how many seconds are needed for each iteration
-	real auvl(nx,ny,nz),avvl(nx,ny,nz),awvl(nx,ny,nz)  ! velocity field at central nodes
+	real(wp) aAveSec           !how many seconds are needed for each iteration
+	real(wp) auvl(nx,ny,nz),avvl(nx,ny,nz),awvl(nx,ny,nz)  ! velocity field at central nodes
 
 	integer, private:: i,j,k,ist,gridx, gridy, gridz ! calcu how many grids should be output in different axis
 	integer, private:: itimestart,itimeend
 	dimension iTimeStart(8),iTimeEnd(8)      !start time and end time
-	real data_and_time,adtdys,area
+	real(wp) data_and_time,adtdys,area
 
 
 	contains
@@ -233,7 +233,7 @@ end subroutine Cust_Out
 subroutine write_vtk_vector(unit, name, ufield, vfield, wfield)
 	integer, intent(in) :: unit
 	character(len=*), intent(in) :: name
-	real, intent(in) :: ufield(nx,ny,nz), vfield(nx,ny,nz), wfield(nx,ny,nz)
+	real(wp), intent(in) :: ufield(nx,ny,nz), vfield(nx,ny,nz), wfield(nx,ny,nz)
 	integer i,j,k
 	real(kind=4) :: val4
 
@@ -256,7 +256,7 @@ end subroutine write_vtk_vector
 subroutine write_vtk_scalar(unit, name, field)
 	integer, intent(in) :: unit
 	character(len=*), intent(in) :: name
-	real, intent(in) :: field(nx,ny,nz)
+	real(wp), intent(in) :: field(nx,ny,nz)
 	integer i,j,k
 	real(kind=4) :: val4
 
@@ -278,7 +278,7 @@ subroutine CalTime
 	call date_and_time(values = iTimeEnd)
 	iSecUsed=86400*(iTimeEnd(3)-iTimeStart(3))+3600*(iTimeEnd(5)-iTimeStart(5))+60* &    !calcu the time has been used
 		(iTimeEnd(6)-iTimeStart(6))+iTimeEnd(7)-iTimeStart(7)
-	aAveSec=real(iSecUsed)/real(itertot)     ! calcu how many seconds are needed for each iteration
+	aAveSec=real(iSecUsed,wp)/real(itertot,wp)     ! calcu how many seconds are needed for each iteration
 end subroutine CalTime
 
 !********************************************************************

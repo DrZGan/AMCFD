@@ -11,8 +11,8 @@ module convergence
 subroutine enhance_converge_speed   
 	implicit none
 	integer i,j,k
-	real bl,blp,blm,blc       
-	real pib,qib,denom,delh      !Defination method from F77,  denom is real, others are arraies with the length of nx
+	real(wp) bl,blp,blm,blc       
+	real(wp) pib,qib,denom,delh      !Defination method from F77,  denom is real, others are arraies with the length of nx
 		
 	dimension bl(nx), blp(nx), blm(nx), blc(nx), delh(nx), pib(nx),qib(nx)
 

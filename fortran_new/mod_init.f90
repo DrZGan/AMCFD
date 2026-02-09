@@ -11,7 +11,7 @@ module initialization
 	implicit none
 
  
-	real dgdt, deltemp,cpavg,hlcal,hlatnt,boufac
+	real(wp) dgdt, deltemp,cpavg,hlcal,hlatnt,boufac
  	!temperature coefficient of surface tension,
         !temperature difference between solidus and liquidus,
         !average capacity,
@@ -22,42 +22,39 @@ module initialization
         !bouyancy/temperature rise,
         !density*scanning speed
 
-	real vis(nx,ny,nz),diff(nx,ny,nz),den(nx,ny,nz)
+	real(wp) vis(nx,ny,nz),diff(nx,ny,nz),den(nx,ny,nz)
 	!viscosity matrix, diffusion matrix, density matrix
 
-	real uVel(nx,ny,nz),vVel(nx,ny,nz),wVel(nx,ny,nz),unot(nx,ny,nz),vnot(nx,ny,nz),wnot(nx,ny,nz)
+	real(wp) uVel(nx,ny,nz),vVel(nx,ny,nz),wVel(nx,ny,nz),unot(nx,ny,nz),vnot(nx,ny,nz),wnot(nx,ny,nz)
 	!uvw velocity matrix, previous time velocity matrix
 		
-	real pressure(nx,ny,nz),pp(nx,ny,nz),enthalpy(nx,ny,nz),hnot(nx,ny,nz),temp(nx,ny,nz),tnot(nx,ny,nz)
+	real(wp) pressure(nx,ny,nz),pp(nx,ny,nz),enthalpy(nx,ny,nz),hnot(nx,ny,nz),temp(nx,ny,nz),tnot(nx,ny,nz)
 	!pressure, enthalpy, temperature, and previous pressure, enthalpy, temperature.
 
-	real dux(nx,ny,nz),dvy(nx,ny,nz),dwz(nx,ny,nz),su(nx,ny,nz),sp(nx,ny,nz)
+	real(wp) dux(nx,ny,nz),dvy(nx,ny,nz),dwz(nx,ny,nz),su(nx,ny,nz),sp(nx,ny,nz)
 	!velocity rise matrix, source term matrix su and sp
 
-	integer ivar	!main   index of variable equation
+	! ivar removed: specific subroutines are called directly from main.f90
+	! phi/equivalence removed: field arrays are passed explicitly to the TDMA solver
 
-	real phi(nx,ny,nz,nvar)  ! four diemnsion matrix, four varialbe at each space point: u,v,w,p
-	equivalence (phi(1,1,1,1),uVel(1,1,1)),(phi(1,1,1,2),vVel(1,1,1)),(phi(1,1,1,3),wVel(1,1,1)),	&
-		(phi(1,1,1,4),pp(1,1,1))
-
-	real fracl(nx,ny,nz),fraclnot(nx,ny,nz)	
+	real(wp) fracl(nx,ny,nz),fraclnot(nx,ny,nz)	
 	!volume fraction of liquid matrix, and previous matrix
 	
 
-	real resorm,refmom,ahtoploss	
+	real(wp) resorm,refmom,ahtoploss	
 	!  pressure residual error, reference residual error and total heat loss at top surface
 	
-	real ap(nx,ny,nz),an(nx,ny,nz),as(nx,ny,nz),ae(nx,ny,nz),aw(nx,ny,nz),at(nx,ny,nz),ab(nx,ny,nz), &
+	real(wp) ap(nx,ny,nz),an(nx,ny,nz),as(nx,ny,nz),ae(nx,ny,nz),aw(nx,ny,nz),at(nx,ny,nz),ab(nx,ny,nz), &
 		apnot(nx,ny,nz)	
 
-	real enthalpyWest,enthalpyEast,enthalpyNorth,enthalpyBottom,enthalpyPreheat
+	real(wp) enthalpyWest,enthalpyEast,enthalpyNorth,enthalpyBottom,enthalpyPreheat
 
 	integer TrackNum, PathNum
-	real solidfield(nx,ny,nz)
-	real beam_pos, beam_posy
-	real toolmatrix(TOOLLINES,5)
-	real coordhistory(COORDLINES,8)
-	real RHF
+	real(wp) solidfield(nx,ny,nz)
+	real(wp) beam_pos, beam_posy
+	real(wp) toolmatrix(TOOLLINES,5)
+	real(wp) coordhistory(COORDLINES,8)
+	real(wp) RHF
 	
 	contains
 

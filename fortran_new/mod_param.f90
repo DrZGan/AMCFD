@@ -6,13 +6,14 @@ module parameters
 	use constant
 
 	implicit none
-	real alaspow, alaseta, alasrb, alasfact, scanvelx, scanvely
-	real alaspowvol, alasetavol, sourcerad, sourcedepth
-	real dens, denl, viscos, tsolid, tliquid, tboiling, hsmelt, hlfriz, acpa,acpb, acpl, thconsa,thconsb, thconl, beta, emiss, dgdtp
-	real layerheight, pden, pcpa, pcpb, pthcona, pthconb
-	real delt, timax, urfu, urfv, urfw, urfp, urfh	
-	real xzone(nx1),yzone(ny1),zzone(nz1),powrx(nx1),powry(ny1),powrz(nz1)
-	real htci, htcj, htck1, htckn, tempWest, tempEast, tempNorth, tempBottom, tempPreheat, tempAmb	
+	real(wp) alaspow, alaseta, alasrb, alasfact, scanvelx, scanvely
+	real(wp) alaspowvol, alasetavol, sourcerad, sourcedepth
+	real(wp) dens, denl, viscos, tsolid, tliquid, tboiling, hsmelt, hlfriz, acpa, acpb, acpl, &
+		thconsa, thconsb, thconl, beta, emiss, dgdtp
+	real(wp) layerheight, pden, pcpa, pcpb, pthcona, pthconb
+	real(wp) delt, timax, urfu, urfv, urfw, urfp, urfh	
+	real(wp) xzone(nx1),yzone(ny1),zzone(nz1),powrx(nx1),powry(ny1),powrz(nz1)
+	real(wp) htci, htcj, htck1, htckn, tempWest, tempEast, tempNorth, tempBottom, tempPreheat, tempAmb	
 	integer nzx, nzy, nzz, maxit
 	integer ncvx(nx1),ncvy(ny1),ncvz(nz1)
 

@@ -11,37 +11,18 @@ module residue
 
 	implicit none
 
-	real resoru,resorv,resorw,resorh  !residual error of u v w h
+	real(wp) resoru,resorv,resorw,resorh  !residual error of u v w h
 	contains
-
-subroutine residual
-	integer i,j,k
-	real sumd,resor,umaxt,denom,dtpvar,sumh
-
-	select case(ivar)
-	case(1)
-		call calc_momentum_residual(uVel, resoru, .true.)
-	case(2)
-		call calc_momentum_residual(vVel, resorv, .false.)
-	case(3)
-		call calc_momentum_residual(wVel, resorw, .false.)
-	case(4)
-		call calc_pressure_residual
-	case(5)
-		call calc_enthalpy_residual
-	end select
-
-end subroutine residual
 
 !********************************************************************
 ! Generic momentum residual calculation for u, v, w velocities
 !********************************************************************
 subroutine calc_momentum_residual(vel, resor_out, calc_refmom)
-	real, intent(in) :: vel(nx,ny,nz)
-	real, intent(out) :: resor_out
+	real(wp), intent(in) :: vel(nx,ny,nz)
+	real(wp), intent(out) :: resor_out
 	logical, intent(in) :: calc_refmom
 	integer i,j,k
-	real sumd,resor,umaxt
+	real(wp) sumd,resor,umaxt
 
 	sumd=0.0
 
@@ -70,7 +51,7 @@ end subroutine calc_momentum_residual
 !********************************************************************
 subroutine calc_pressure_residual
 	integer i,j,k
-	real denom,dtpvar
+	real(wp) denom,dtpvar
 
 	denom=0.0
 	do k=kstat,nkm1
@@ -93,7 +74,7 @@ end subroutine calc_pressure_residual
 !********************************************************************
 subroutine calc_enthalpy_residual
 	integer i,j,k
-	real sumd,sumh,resor
+	real(wp) sumd,sumh,resor
 
 	sumh=0.0
 	sumd=0.0

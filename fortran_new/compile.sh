@@ -12,6 +12,7 @@ echo "Compiling AM-CFD..."
 # Compile all modules and main program
 # Order matters: dependencies must be compiled first
 gfortran -fopenmp -O3 -march=native -mcmodel=large -c \
+    mod_precision.f90 \
     mod_const.f90 \
     mod_cfd_utils.f90 \
     mod_param.f90 \

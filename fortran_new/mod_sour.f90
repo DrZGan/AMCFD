@@ -12,32 +12,9 @@ module source
 	use cfd_utils
 	implicit none
 
-	real sourceinput(nx,ny,nz)
+	real(wp) sourceinput(nx,ny,nz)
 
 	contains
-
-subroutine source_term
-	integer i,j,k
-	real fraclu,fraclv,fraclw,tw,volht
-	real term,term1,term3
-	real tulc,tvlc,twlc
-	real flew,flns,fltb
-	real alasetavol_rhf, sourcerad_rhf, sourcedepth_rhf
-
-	select case(ivar)
-	case(1)
-		call source_u
-	case(2)
-		call source_v
-	case(3)
-		call source_w
-	case(4)
-		call source_pp
-	case(5)
-		call source_enthalpy
-	end select
-
-end subroutine source_term
 
 !*********************************************************************
 subroutine zero_solid_coefficients(i,j,k)
@@ -56,7 +33,7 @@ end subroutine zero_solid_coefficients
 !*********************************************************************
 subroutine source_u
 	integer i,j,k
-	real fraclu,term,tulc
+	real(wp) fraclu,term,tulc
 
 	do k=kstat,nkm1
 !$OMP PARALLEL PRIVATE(fraclu,term)
@@ -109,7 +86,7 @@ end subroutine source_u
 !*********************************************************************
 subroutine source_v
 	integer i,j,k
-	real fraclv,term,tvlc
+	real(wp) fraclv,term,tvlc
 
 	do k=kstat,nkm1
 !$OMP PARALLEL PRIVATE(fraclv,term)
@@ -162,7 +139,7 @@ end subroutine source_v
 !********************************************************************
 subroutine source_w
 	integer i,j,k
-	real fraclw,term,tw,twlc
+	real(wp) fraclw,term,tw,twlc
 
 	do k=kstat,nkm1
 !$OMP PARALLEL PRIVATE(fraclw,term,tw)
@@ -228,8 +205,8 @@ end subroutine source_pp
 !********************************************************************
 subroutine source_enthalpy
 	integer i,j,k
-	real volht,flew,flns,fltb
-	real alasetavol_rhf, sourcerad_rhf, sourcedepth_rhf
+	real(wp) volht,flew,flns,fltb
+	real(wp) alasetavol_rhf, sourcerad_rhf, sourcedepth_rhf
 
 	sourcedepth_rhf=sourcedepth*(RHF)**2
 	alasetavol_rhf=sourcedepth_rhf*3700

@@ -13,37 +13,10 @@ module boundary
 
 	contains
 
-subroutine bound_condition
-
-!********************************************************************
-
-	integer i,j,k
-	real dtdx,dtdy,term1,ctmp1
-	real fraclu,fraclv
-	real hlossradia,hlossconvec
-	real visu1,visv1
-
-!********************************************************************
-	select case(ivar)
-	case(1)
-		call bound_u
-	case(2)
-		call bound_v
-	case(3)
-		call bound_w
-	case(4)
-		call bound_pp
-	case(5)
-		call bound_enthalpy
-	end select
-
-	return
-end subroutine bound_condition
-
 !********************************************************************
 subroutine bound_u
 	integer i,j,k
-	real dtdx,fraclu,visu1,term1
+	real(wp) dtdx,fraclu,visu1,term1
 
 !-----k=nk (Marangoni stress on top surface)
 	do j=jstat,jend
@@ -64,7 +37,7 @@ end subroutine bound_u
 !********************************************************************
 subroutine bound_v
 	integer i,j,k
-	real dtdy,fraclv,visv1,term1
+	real(wp) dtdy,fraclv,visv1,term1
 
 !-----k=nk (Marangoni stress on top surface)
 	do j=jstat,jend
@@ -99,7 +72,7 @@ end subroutine bound_pp
 !********************************************************************
 subroutine bound_enthalpy
 	integer i,j,k
-	real ctmp1,hlossradia,hlossconvec
+	real(wp) ctmp1,hlossradia,hlossconvec
 
 !-----k=nk top surface
 	ahtoploss=0.0

@@ -14,45 +14,13 @@ module discretization
 
 	contains
 
-subroutine discretize
-	integer i,j,k
-	real vn,vs,ue,uw,wt,wb,fn,fs,fe,fw,ft,fb
-	real visn,viss,visv,visvw,visve
-	real visu,visun,visus
-	real vise,visw,visut,visub
-	real vist,visb
-	real visvt,visvb
-	real ds,dn,de,dw,dt,db
-	real delf,cp0,cp1
-	real dudxp,dudxm,dvdxp,dvdxm,dwdxp,dwdxm
-	real dudyp,dudym,dvdyp,dvdym,dwdyp,dwdym
-	real vis_w,viswn,visws,viswe,visww
-	real dudzp,dudzm,dvdzp,dvdzm,dwdzp,dwdzm
-	real difn,dife,dift,tmp1
-
-	select case(ivar)
-	case(1)
-		call discretize_u
-	case(2)
-		call discretize_v
-	case(3)
-		call discretize_w
-	case(4)
-		call discretize_pp
-	case(5)
-		call discretize_enthalpy
-	end select
-
-	return
-end subroutine discretize
-
 !********************************************************************
 subroutine discretize_u
 	integer i,j,k
-	real vn,vs,ue,uw,wt,wb,fn,fs,fe,fw,ft,fb
-	real visu,visun,visus,visn,viss,vise,visw,visut,visub,vist,visb
-	real ds,dn,de,dw,dt,db,delf,cp0,cp1
-	real dudxp,dudxm,dvdxp,dvdxm,dwdxp,dwdxm
+	real(wp) vn,vs,ue,uw,wt,wb,fn,fs,fe,fw,ft,fb
+	real(wp) visu,visun,visus,visn,viss,vise,visw,visut,visub,vist,visb
+	real(wp) ds,dn,de,dw,dt,db,delf,cp0,cp1
+	real(wp) dudxp,dudxm,dvdxp,dvdxm,dwdxp,dwdxm
 
 	do k=kstat,nkm1
 !$OMP PARALLEL PRIVATE(vn, vs, ue, uw, wt, wb, fn, fs, fe, fw, ft, fb, visu, visun, visus, visn, viss, vise, visw, visut, visub, &
@@ -146,10 +114,10 @@ end subroutine discretize_u
 !********************************************************************
 subroutine discretize_v
 	integer i,j,k
-	real vn,vs,ue,uw,wt,wb,fn,fs,fe,fw,ft,fb
-	real visn,viss,visv,visve,visvw,vise,visw,visvt,visvb,vist,visb
-	real ds,dn,de,dw,dt,db,delf,cp0,cp1
-	real dudyp,dudym,dvdyp,dvdym,dwdyp,dwdym
+	real(wp) vn,vs,ue,uw,wt,wb,fn,fs,fe,fw,ft,fb
+	real(wp) visn,viss,visv,visve,visvw,vise,visw,visvt,visvb,vist,visb
+	real(wp) ds,dn,de,dw,dt,db,delf,cp0,cp1
+	real(wp) dudyp,dudym,dvdyp,dvdym,dwdyp,dwdym
 
 	do k=kstat,nkm1
 !$OMP PARALLEL PRIVATE(vn, vs, ue, uw, wt, wb, fn, fs, fe, fw, ft, fb, visn, viss, visv, visve, visvw, vise, visw, visvt, visvb, &
@@ -242,10 +210,10 @@ end subroutine discretize_v
 !********************************************************************
 subroutine discretize_w
 	integer i,j,k
-	real vn,vs,ue,uw,wt,wb,fn,fs,fe,fw,ft,fb
-	real vis_w,viswn,visws,visn,viss,viswe,visww,vise,visw,vist,visb
-	real ds,dn,de,dw,dt,db,delf,cp0,cp1
-	real dudzp,dudzm,dvdzp,dvdzm,dwdzp,dwdzm
+	real(wp) vn,vs,ue,uw,wt,wb,fn,fs,fe,fw,ft,fb
+	real(wp) vis_w,viswn,visws,visn,viss,viswe,visww,vise,visw,vist,visb
+	real(wp) ds,dn,de,dw,dt,db,delf,cp0,cp1
+	real(wp) dudzp,dudzm,dvdzp,dvdzm,dwdzp,dwdzm
 
 	do k=kstat,nkm1
 !$OMP PARALLEL PRIVATE(vn, vs, ue, uw, wt, wb, fn, fs, fe, fw, ft,fb, vis_w, viswn, visws, visn, viss, viswe, visww, vise,visw, &
@@ -337,7 +305,7 @@ end subroutine discretize_w
 !********************************************************************
 subroutine discretize_pp
 	integer i,j,k
-	real vn,vs,ue,uw,wt,wb,fn,fs,fe,fw,ft,fb,delf
+	real(wp) vn,vs,ue,uw,wt,wb,fn,fs,fe,fw,ft,fb,delf
 
 	resorm=0.0
 	do k=kstat,nkm1
@@ -382,8 +350,8 @@ end subroutine discretize_pp
 !********************************************************************
 subroutine discretize_enthalpy
 	integer i,j,k
-	real vn,vs,ue,uw,wt,wb,fn,fs,fe,fw,ft,fb
-	real difn,dife,dift,dn,de,dt,ds,dw,db,tmp1
+	real(wp) vn,vs,ue,uw,wt,wb,fn,fs,fe,fw,ft,fb
+	real(wp) difn,dife,dift,dn,de,dt,ds,dw,db,tmp1
 
 	do k=2,nkm1
 !$OMP PARALLEL PRIVATE(vn, ue, wt, fn, fe, ft, difn, dife, dift, dn, de, dt, tmp1)

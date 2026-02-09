@@ -12,9 +12,7 @@ module revision
 	subroutine revision_p
 	implicit none
 	integer i,j,k
-	real tulc,tvlc,twlc
-
-	if(ivar.ne.4) return
+	real(wp) tulc,tvlc,twlc
 
 !********************************************************************
 	do k=kstat,nkm1

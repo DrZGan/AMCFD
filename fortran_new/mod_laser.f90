@@ -12,7 +12,7 @@ module laserinput
 	integer istart,jstart,imin,imax,jmin,jmax,kmin,kmax
 	!index of mid-length of melt pool, maximum and minimum indexes of melt pool dimension
 
-	real heatin(nx,ny), heatinLaser, peakhin, timet
+	real(wp) heatin(nx,ny), heatinLaser, peakhin, timet
 	!heat flux matrix, heat flux [J/s], peak laser density, time, x-value of central laser beam, y-value of central laser beam
 
 	contains 
@@ -22,7 +22,7 @@ subroutine laser_beam
 
 	integer i,j,k,iout,jout
 
-	real xloc,rb2,varlas,xdist,ydist,dist2, xprime, yprime, zprime
+	real(wp) xloc,rb2,varlas,xdist,ydist,dist2, xprime, yprime, zprime
 
 	if(timet .gt. toolmatrix(PathNum,1) .and. toolmatrix(PathNum+1,1) .ge. -0.5)then
 		PathNum = PathNum+1

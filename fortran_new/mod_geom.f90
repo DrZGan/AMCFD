@@ -7,22 +7,22 @@ module geometry
 	use parameters
 	implicit none
 
-	real dimx,dimy,dimz	
+	real(wp) dimx,dimy,dimz	
 	!maximum coordinate values
 	
-	real x(nx),y(ny),z(nz),xu(nx),yv(ny),zw(nz),dxpwinv(nx),dypsinv(ny),dzpbinv(nz)
+	real(wp) x(nx),y(ny),z(nz),xu(nx),yv(ny),zw(nz),dxpwinv(nx),dypsinv(ny),dzpbinv(nz)
 	!    x-value, y-value, z-value, u-value, v-value, z-value, 3 operaters
 
-	real volume_u(nx,ny,nz),volume_v(nx,ny,nz),volume_w(nx,ny,nz),volume(nx,ny,nz)
+	real(wp) volume_u(nx,ny,nz),volume_v(nx,ny,nz),volume_w(nx,ny,nz),volume(nx,ny,nz)
 	!volume of CV
 
-	real areaij(nx,ny),areajk(ny,nz),areaik(nx,nz)
+	real(wp) areaij(nx,ny),areajk(ny,nz),areaik(nx,nz)
 	!area of surface of scalar CV
 		
-	real areauij(nx,ny),areauik(nx,nz),areavjk(ny,nz),areavij(nx,ny),areawik(nx,nz),areawjk(ny,nz)
+	real(wp) areauij(nx,ny),areauik(nx,nz),areavjk(ny,nz),areavij(nx,ny),areawik(nx,nz),areawjk(ny,nz)
 	!area of surface of velocity CV
 	
-	real fracx(nx),fracy(ny),fracz(nz)
+	real(wp) fracx(nx),fracy(ny),fracz(nz)
 	!operaters to calcu diffusion coefficient
 		
 	integer ni,nim1,nj,njm1,nk,nkm1 
@@ -31,85 +31,58 @@ module geometry
 
 	contains 
 
+!----------------------------------------------------------------------
+! Generate a 1D non-uniform grid for one coordinate direction.
+! vel_grid: staggered velocity node positions (xu, yv, or zw)
+! scalar_grid: scalar node positions (x, y, or z)
+! n, nm1: total node count and n-1
+!----------------------------------------------------------------------
+subroutine generate_1d_grid(nzones, zones, ncv, powr, vel_grid, scalar_grid, n, nm1)
+	integer, intent(in) :: nzones
+	real(wp), intent(in) :: zones(:), powr(:)
+	integer, intent(in) :: ncv(:)
+	real(wp), intent(inout) :: vel_grid(:), scalar_grid(:)
+	integer, intent(out) :: n, nm1
+	integer :: i, j, ist
+	real(wp) :: statloc, term
+
+	vel_grid(1:2) = 0.0
+	ist = 2
+	statloc = 0.0
+	n = 2
+	do i = 1, nzones
+		n = n + ncv(i)
+		do j = 1, ncv(i)
+			if (powr(i) .ge. 0.0) then
+				term = (real(j,wp)/real(ncv(i),wp))**powr(i)
+			else
+				term = 1.0 - (1.0 - real(j,wp)/real(ncv(i),wp))**(-powr(i))
+			endif
+			vel_grid(j+ist) = statloc + zones(i)*term
+		enddo
+		ist = ist + ncv(i)
+		statloc = statloc + zones(i)
+	enddo
+	nm1 = n - 1
+
+	do i = 1, nm1
+		scalar_grid(i) = (vel_grid(i+1) + vel_grid(i)) * 0.5
+	enddo
+	scalar_grid(n) = vel_grid(n)
+end subroutine generate_1d_grid
+
 subroutine generate_grid
 
-	integer i,j,k,ist
-	real statloc,term
+	integer i,j,k
 
 !----x grid---------------------------------------
-	xu(1:2) = 0.0        !
-	ist = 2
-	statloc = 0
-	ni=2
-	do i=1, nzx           ! loop in sub-region
-		ni=ni+ncvx(i)  !calcu node num in each sub-region
-		do j=1, ncvx(i)
-			if(powrx(i).ge.0.0)then   !prow>=0
-				term=(real(j)/real(ncvx(i)))**powrx(i)    !grids transit from fine to coarse
-			else
-				term=1.0-(1.0-real(j)/real(ncvx(i)))**(-powrx(i)) !grids transit from coarse to fine
-			endif
-			xu(j+ist) = statloc + xzone(i)*term
-		enddo
-		ist = ist + ncvx(i)
-		statLoc = statLoc + xzone(i)
-	enddo
-	nim1=ni-1          !coordinate value of nim1 scalar nodes can be interpolately got from that of ni uVel nodes
-
-	do i=1,nim1
-		x(i)=(xu(i+1)+xu(i))*0.5  ! central interpolation
-	enddo
-	x(ni)=xu(ni)     ! last coordinate value of scalar node equals to that of uVel nodes
+	call generate_1d_grid(nzx, xzone, ncvx, powrx, xu, x, ni, nim1)
 
 !-------y grids----------------------------
-	yv(1:2) = 0.0
-	ist = 2
-	statloc = 0.0
-	nj=2
-	do i=1, nzy
-		nj=nj+ncvy(i)
-		do j=1, ncvy(i)
-			if(powry(i).ge.0.0)then
-				term=(real(j)/real(ncvy(i)))**powry(i)
-			else
-				term=1.0-(1.0-real(j)/real(ncvy(i)))**(-powry(i))
-			endif
-			yv(j+ist) = statloc + yzone(i)*term
-		enddo
-		ist = ist + ncvy(i)
-		statLoc = statLoc + yzone(i)
-	enddo
-	njm1=nj-1
-	
-	do i=1,njm1
-		y(i)=(yv(i+1)+yv(i))*0.5
-	enddo
-	y(nj)=yv(nj)
+	call generate_1d_grid(nzy, yzone, ncvy, powry, yv, y, nj, njm1)
 
 !-----------z grids----------------------------
-	zw(1:2) = 0.0
-	ist = 2
-	statloc = 0.0
-	nk=2
-	do i = 1,nzz
-		nk=nk+ncvz(i)
-		do j = 1, ncvz(i)
-			if(powrz(i).ge.0.0)then
-				term=(real(j)/real(ncvz(i)))**powrz(i)
-			else
-				term=1.0-(1.0-real(j)/real(ncvz(i)))**(-powrz(i))
-			endif
-			zw(j+ist) = statloc + zzone(i)*term
-		enddo
-		ist = ist + ncvz(i)
-		statLoc = statLoc + zzone(i)
-	enddo
-	nkm1=nk-1
-
-	do i=1,nkm1
-	z(i)=(zw(i+1)+zw(i))*0.5
-	enddo
-	z(nk)=zw(nk)
+	call generate_1d_grid(nzz, zzone, ncvz, powrz, zw, z, nk, nkm1)
 
 !********************************************************************
 

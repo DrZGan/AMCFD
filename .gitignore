@@ -9,3 +9,7 @@ fort.*
 # Simulation output
 **/result/output.txt
 **/result/*.vtk
+
+# Accidental / junk files
+-fopenmp
+**/1
