@@ -26,7 +26,7 @@ subroutine laser_beam
 
 	if(timet .gt. toolmatrix(PathNum,1) .and. toolmatrix(PathNum+1,1) .ge. -0.5)then
 		PathNum = PathNum+1
-		if(toolmatrix(PathNum,5) .ge. 0.5) TrackNum=TrackNum+1
+		if(toolmatrix(PathNum,5) .ge. laser_on_threshold) TrackNum=TrackNum+1
 	endif
 
 	!print*, PathNum
@@ -37,28 +37,28 @@ subroutine laser_beam
 	beam_posy = beam_posy+ delt*scanvely
 	
 
-	iout=0            !reserve intial index of x[]
-	jout=0            !reserve intial index of y[]
+	iout=1            !reserve intial index of x[]
+	jout=1            !reserve intial index of y[]
 
 
 	xloc=beam_pos     !inital x-coodinate value of laser beam center
 
 
 	do i=2,nim1
-		if (xloc.le.x(i)) go to 701   !x(i)>=xloc, goto701, iout=i-1 at this time
+		if (xloc.le.x(i)) exit   !x(i)>=xloc, iout=i-1 at this time
 		iout=i
 	enddo
-701	if(abs(xloc-x(iout+1)).lt.abs(xloc-x(iout))) iout=iout+1    !judge which is more close to xloc, x(i) or x(i-1)
+	if(abs(xloc-x(iout+1)).lt.abs(xloc-x(iout))) iout=iout+1    !judge which is more close to xloc, x(i) or x(i-1)
 	istart=iout        !reserve index of x[], which is nearest from xloc
 
 	!print*, istart
 	!***!Find the index j of y(), which y(j)~beam_posy****
 
 	do j=2,njm1
-		if (beam_posy.le.y(j)) go to 702   !y(j)>=beam_posy, goto702, jout=j-1 at this time    
+		if (beam_posy.le.y(j)) exit   !y(j)>=beam_posy, jout=j-1 at this time    
 		jout=j
 	enddo
-702	if(abs(beam_posy-y(jout+1)).lt.abs(beam_posy-y(jout))) jout=jout+1    !judge which is more close to xloc, x(i) or x(i-1)
+	if(abs(beam_posy-y(jout+1)).lt.abs(beam_posy-y(jout))) jout=jout+1    !judge which is more close to xloc, x(i) or x(i-1)
 	jstart=jout        !reserve index of y[], which is nearest from beam_posy
 	!print*, jstart
 	!************************************************
@@ -67,7 +67,7 @@ subroutine laser_beam
 	heatinLaser=0.0    
 	rb2=alasrb**2                     !  rb2=square of beam radius
 
-	if(toolmatrix(PathNum,5) .gt. 0.5)then
+	if(toolmatrix(PathNum,5) .gt. laser_on_threshold)then
 		varlas=alaspow*alaseta            !  varlas= effective laser power
 	else
 		varlas=0
@@ -102,7 +102,6 @@ subroutine laser_beam
 
 
 
-	return
 end subroutine laser_beam
 
 end module laserinput

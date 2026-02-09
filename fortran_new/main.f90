@@ -75,29 +75,30 @@ program main
 			call enthalpy_to_temp
 
 			call pool_size
-			if(tpeak.le.tsolid) exit iter_loop
-			call cleanuvw
+			if(tpeak.gt.tsolid) then
+				call cleanuvw
 
 !-----ivar=1,4------------solve momentum equations
-			do ivar=1,4
-				call bound_condition
-				call discretize
-				call source_term
-				call residual
-				call solution_uvw
-				call revision_p
-			enddo
+				do ivar=1,4
+					call bound_condition
+					call discretize
+					call source_term
+					call residual
+					call solution_uvw
+					call revision_p
+				enddo
+			endif
 
 !-----convergence criterion------------
 			call heat_fluxes
 			amaxres=max(resorm, resoru,resorv,resorw)
 
-			if(toolmatrix(PathNum,5) .ge. 0.5)then
+			if(toolmatrix(PathNum,5) .ge. laser_on_threshold)then
 				! Laser on: transient-state criteria (heating stage)
-				if(amaxres.lt.5.0e-4 .and. ratio.le.1.01.and.ratio.ge.0.99) exit iter_loop
+				if(amaxres.lt.conv_res_heat .and. ratio.le.ratio_upper .and. ratio.ge.ratio_lower) exit iter_loop
 			else
 				! Laser off: transient-state criteria (cooling stage)
-				if(resorh.lt.5.0e-7) exit iter_loop
+				if(resorh.lt.conv_res_cool) exit iter_loop
 			endif
 
 		end do iter_loop

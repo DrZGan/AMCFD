@@ -12,7 +12,7 @@ module cfd_utils
     implicit none
     private
 
-    public :: harmonic_mean, power_law_coeff, darcy_resistance
+    public :: harmonic_mean, power_law_coeff, darcy_resistance, temp_to_enthalpy
 
 contains
 
@@ -46,5 +46,13 @@ pure elemental real function darcy_resistance(viscos, fracl) result(res)
     real, parameter :: eps = 1.0e-3          ! small constant to avoid division by zero
     res = 180.0 * viscos / perm_const * (1.0 - fracl)**2 / (fracl + eps)
 end function darcy_resistance
+
+!------------------------------------------------------------------------------
+! Convert temperature to enthalpy using quadratic heat capacity fit
+!------------------------------------------------------------------------------
+pure elemental real function temp_to_enthalpy(temp, acpa, acpb) result(res)
+    real, intent(in) :: temp, acpa, acpb
+    res = 0.5 * acpa * temp**2 + acpb * temp
+end function temp_to_enthalpy
 
 end module cfd_utils

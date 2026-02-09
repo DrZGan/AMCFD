@@ -217,80 +217,59 @@ subroutine Cust_Out
 	enddo
 
 	
-	! Write Velocity vector (U, V, W) in binary - VTK requires newline before field name
-	write(41) char(10), 'VECTORS Velocity float', char(10)
-	do k=2,nkm1
-	do j=2,njm1
-	do i=2,nim1
-		val4 = real(auvl(i,j,k), 4)
-		write(41) val4
-		val4 = real(avvl(i,j,k), 4)
-		write(41) val4
-		val4 = real(awvl(i,j,k), 4)
-		write(41) val4
-	enddo
-	enddo
-	enddo
-	
-	! Temperature (T)
-	write(41) char(10), 'SCALARS T float 1', char(10), 'LOOKUP_TABLE default', char(10)
-	do k=2,nkm1
-	do j=2,njm1
-	do i=2,nim1
-		val4 = real(temp(i,j,k), 4)
-		write(41) val4
-	enddo
-	enddo
-	enddo
-	
-	! Viscosity (vis)
-	write(41) char(10), 'SCALARS vis float 1', char(10), 'LOOKUP_TABLE default', char(10)
-	do k=2,nkm1
-	do j=2,njm1
-	do i=2,nim1
-		val4 = real(vis(i,j,k), 4)
-		write(41) val4
-	enddo
-	enddo
-	enddo
-	
-	! Diffusivity (diff)
-	write(41) char(10), 'SCALARS diff float 1', char(10), 'LOOKUP_TABLE default', char(10)
-	do k=2,nkm1
-	do j=2,njm1
-	do i=2,nim1
-		val4 = real(diff(i,j,k), 4)
-		write(41) val4
-	enddo
-	enddo
-	enddo
-	
-	! Density (den)
-	write(41) char(10), 'SCALARS den float 1', char(10), 'LOOKUP_TABLE default', char(10)
-	do k=2,nkm1
-	do j=2,njm1
-	do i=2,nim1
-		val4 = real(den(i,j,k), 4)
-		write(41) val4
-	enddo
-	enddo
-	enddo
-	
-	! SolidID
-	write(41) char(10), 'SCALARS solidID float 1', char(10), 'LOOKUP_TABLE default', char(10)
-	do k=2,nkm1
-	do j=2,njm1
-	do i=2,nim1
-		val4 = real(solidfield(i,j,k), 4)
-		write(41) val4
-	enddo
-	enddo
-	enddo
+	call write_vtk_vector(41, 'Velocity', auvl, avvl, awvl)
+	call write_vtk_scalar(41, 'T', temp)
+	call write_vtk_scalar(41, 'vis', vis)
+	call write_vtk_scalar(41, 'diff', diff)
+	call write_vtk_scalar(41, 'den', den)
+	call write_vtk_scalar(41, 'solidID', solidfield)
 
 	close(41)
 
 
 end subroutine Cust_Out
+
+!********************************************************************
+subroutine write_vtk_vector(unit, name, ufield, vfield, wfield)
+	integer, intent(in) :: unit
+	character(len=*), intent(in) :: name
+	real, intent(in) :: ufield(nx,ny,nz), vfield(nx,ny,nz), wfield(nx,ny,nz)
+	integer i,j,k
+	real(kind=4) :: val4
+
+	write(unit) char(10), 'VECTORS ' // trim(name) // ' float', char(10)
+	do k=2,nkm1
+	do j=2,njm1
+	do i=2,nim1
+		val4 = real(ufield(i,j,k), 4)
+		write(unit) val4
+		val4 = real(vfield(i,j,k), 4)
+		write(unit) val4
+		val4 = real(wfield(i,j,k), 4)
+		write(unit) val4
+	enddo
+	enddo
+	enddo
+end subroutine write_vtk_vector
+
+!********************************************************************
+subroutine write_vtk_scalar(unit, name, field)
+	integer, intent(in) :: unit
+	character(len=*), intent(in) :: name
+	real, intent(in) :: field(nx,ny,nz)
+	integer i,j,k
+	real(kind=4) :: val4
+
+	write(unit) char(10), 'SCALARS ' // trim(name) // ' float 1', char(10), 'LOOKUP_TABLE default', char(10)
+	do k=2,nkm1
+	do j=2,njm1
+	do i=2,nim1
+		val4 = real(field(i,j,k), 4)
+		write(unit) val4
+	enddo
+	enddo
+	enddo
+end subroutine write_vtk_scalar
 
 
 !********************************************************************
@@ -327,7 +306,6 @@ subroutine EndTime
 	
 
 
-	return
 end subroutine EndTime
 
 
@@ -340,7 +318,6 @@ subroutine OpenFiles
 
 	write(41,*)'TITLE = "Thermo-Capillary Flow in Laser-Generated Melt Pool"'
 
-	return
 end subroutine OpenFiles
 
 end module printing

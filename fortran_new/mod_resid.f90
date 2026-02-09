@@ -31,7 +31,6 @@ subroutine residual
 		call calc_enthalpy_residual
 	end select
 
-	return
 end subroutine residual
 
 !********************************************************************
@@ -62,6 +61,7 @@ subroutine calc_momentum_residual(vel, resor_out, calc_refmom)
 	if(calc_refmom) then
 		umaxt=maxval(abs(uVel(istatp1:iendm1,jstat:jend,nk)))
 		refmom=0.25*pi*MIN(width,alen,depth)**2*denl*umaxt**2
+		refmom=max(refmom, small)
 	endif
 
 	resor_out=sumd/refmom

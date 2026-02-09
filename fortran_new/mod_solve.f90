@@ -54,7 +54,6 @@ module solver
 
 
 
-	return
 end subroutine solution_uvw
 !********************************************************************
 subroutine solution_enthalpy
@@ -65,14 +64,6 @@ subroutine solution_enthalpy
 	dimension pr(nx),qr(nx)
 
 !********************************************************************
-	goto (100,200,300,400,500)ivar
-
-!********************************************************************
-100	continue
-200	continue
-300	continue
-400	continue
-500	continue
 !-----TDMA
 
 	do ksweep=1,2                          !scan k direction twice
@@ -109,7 +100,6 @@ subroutine solution_enthalpy
 	enddo
 
 	enddo
-	return
 !********************************************************************
 
 end subroutine solution_enthalpy
@@ -142,8 +132,6 @@ subroutine cleanuvw
 	enddo
 !$OMP END PARALLEL
 	enddo
-	return
-
 end subroutine cleanuvw
 
 end module

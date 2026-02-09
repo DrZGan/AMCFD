@@ -6,6 +6,7 @@ module initialization
 	use geometry
 	use constant
 	use parameters
+	use cfd_utils
 
 	implicit none
 
@@ -73,11 +74,11 @@ subroutine initialize
 	!write(*,*) hlatnt
 	boufac = denl*g*beta         !bouyancy factor=density/temperature rise
 
-	enthalpyPreheat = 0.5*acpa*tempPreheat**2+acpb*tempPreheat!(tempPreheat-tsolid)*(acpa*tempPreheat/2+acpb)+hsmelt  !translate preheat temp to enthalpy at the boundary
-	enthalpyWest =  0.5*acpa*tempWest**2+acpb*tempWest!(tempWest-tsolid)*(acpa*tempWest/2+acpb)+hsmelt
-	enthalpyEast =  0.5*acpa*tempEast**2+acpb*tempEast!(tempEast-tsolid)*(acpa*tempEast/2+acpb)+hsmelt
-	enthalpyNorth =  0.5*acpa*tempNorth**2+acpb*tempNorth!(tempNorth-tsolid)*(acpa*tempNorth/2+acpb)+hsmelt
-	enthalpyBottom =  0.5*acpa*tempBottom**2+acpb*tempBottom!(tempBottom-tsolid)*(acpa*tempBottom/2+acpb)+hsmelt
+	enthalpyPreheat = temp_to_enthalpy(tempPreheat, acpa, acpb)  !translate preheat temp to enthalpy at the boundary
+	enthalpyWest = temp_to_enthalpy(tempWest, acpa, acpb)
+	enthalpyEast = temp_to_enthalpy(tempEast, acpa, acpb)
+	enthalpyNorth = temp_to_enthalpy(tempNorth, acpa, acpb)
+	enthalpyBottom = temp_to_enthalpy(tempBottom, acpa, acpb)
 
 	do k=1,nk
 	do j=1,nj

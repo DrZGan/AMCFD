@@ -37,8 +37,21 @@ subroutine source_term
 		call source_enthalpy
 	end select
 
-	return
 end subroutine source_term
+
+!*********************************************************************
+subroutine zero_solid_coefficients(i,j,k)
+	integer, intent(in) :: i,j,k
+
+	su(i,j,k)=0.0
+	an(i,j,k)=0.0
+	as(i,j,k)=0.0
+	ae(i,j,k)=0.0
+	aw(i,j,k)=0.0
+	at(i,j,k)=0.0
+	ab(i,j,k)=0.0
+	ap(i,j,k)=great
+end subroutine zero_solid_coefficients
 
 !*********************************************************************
 subroutine source_u
@@ -85,14 +98,7 @@ subroutine source_u
 !------zero velocity in solid-------
 		tulc=min(temp(i,j,k),temp(i-1,j,k))
 		if(tulc.le.tsolid) then
-			su(i,j,k)=0.0
-			an(i,j,k)=0.0
-			as(i,j,k)=0.0
-			ae(i,j,k)=0.0
-			aw(i,j,k)=0.0
-			at(i,j,k)=0.0
-			ab(i,j,k)=0.0
-			ap(i,j,k)=great
+			call zero_solid_coefficients(i,j,k)
 		endif
 	enddo
 	enddo
@@ -145,14 +151,7 @@ subroutine source_v
 !------zero velocity in solid------------
 		tvlc=min(temp(i,j,k),temp(i,j-1,k))
 		if(tvlc.le.tsolid) then
-			su(i,j,k)=0.0
-			an(i,j,k)=0.0
-			as(i,j,k)=0.0
-			ae(i,j,k)=0.0
-			aw(i,j,k)=0.0
-			at(i,j,k)=0.0
-			ab(i,j,k)=0.0
-			ap(i,j,k)=great
+			call zero_solid_coefficients(i,j,k)
 		endif
 	enddo
 	enddo
@@ -199,14 +198,7 @@ subroutine source_w
 !------zero velocity in solid---------
 		twlc=min(temp(i,j,k),temp(i,j,k-1))
 		if(twlc.le.tsolid) then
-			su(i,j,k)=0.0
-			an(i,j,k)=0.0
-			as(i,j,k)=0.0
-			ae(i,j,k)=0.0
-			aw(i,j,k)=0.0
-			at(i,j,k)=0.0
-			ab(i,j,k)=0.0
-			ap(i,j,k)=great
+			call zero_solid_coefficients(i,j,k)
 		endif
 	enddo
 	enddo
@@ -225,14 +217,7 @@ subroutine source_pp
 	do i=istatp1,iendm1
 		ap(i,j,k)=an(i,j,k)+as(i,j,k)+ae(i,j,k)+aw(i,j,k)+at(i,j,k)+ab(i,j,k)-sp(i,j,k)
 		if(temp(i,j,k).le.tsolid)then
-			su(i,j,k)=0.0
-			ap(i,j,k)=great
-			an(i,j,k)=0.0
-			as(i,j,k)=0.0
-			ae(i,j,k)=0.0
-			aw(i,j,k)=0.0
-			at(i,j,k)=0.0
-			ab(i,j,k)=0.0
+			call zero_solid_coefficients(i,j,k)
 		endif
 	enddo
 	enddo
@@ -256,7 +241,7 @@ subroutine source_enthalpy
 !$OMP DO
 	do j=2,njm1
 	do i=2,nim1
-		if(toolmatrix(PathNum,5) .gt. 0.5)then
+		if(toolmatrix(PathNum,5) .gt. laser_on_threshold)then
 			if(z(nk)-z(k).le.sourcedepth_rhf) then
 				sourceinput(i,j,k)=alaspowvol*alasfact/pi/sourcerad_rhf**2/sourcedepth_rhf*alasetavol_rhf*&
 				exp(-alasfact/sourcerad_rhf**2*((beam_pos-x(i))**2+(beam_posy-y(j))**2))

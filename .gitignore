@@ -2,9 +2,6 @@
 *.o
 *.mod
 **/cluster_main
-**/cluster_main*
--fopenmp
-1
 
 # Fortran temp files
 fort.*
@@ -12,6 +9,3 @@ fort.*
 # Simulation output
 **/result/output.txt
 **/result/*.vtk
-
-# Utility scripts
-run_both.sh

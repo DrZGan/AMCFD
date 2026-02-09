@@ -35,12 +35,12 @@ subroutine properties
 
 		if(temp(i,j,k).ge.tliquid) cycle          
 			diff(i,j,k)=diffs          !temperature is less than solidus
-			vis(i,j,k)=1.e10
+			vis(i,j,k)=vis_solid
 			den(i,j,k)=dens
 
-			if(z(nk)-z(k) .le. layerheight .and. solidfield(i,j,k) .le. 0.5)then    !powder properties
+			if(z(nk)-z(k) .le. layerheight .and. solidfield(i,j,k) .le. powder_threshold)then    !powder properties
 				den(i,j,k)=pden
-				vis(i,j,k)=1.e10
+				vis(i,j,k)=vis_solid
 				diff(i,j,k)=(pthcona*temp(i,j,k)+pthconb)/(pcpa*temp(i,j,k)+pcpb)
 			endif
 
@@ -53,8 +53,6 @@ subroutine properties
 	enddo
 !$OMP END PARALLEL
 	enddo
-	return
-	
 end subroutine properties	
 end module property
 

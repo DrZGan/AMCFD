@@ -14,10 +14,9 @@ module revision
 	integer i,j,k
 	real tulc,tvlc,twlc
 
-	goto (500,500,500,400,500)ivar
+	if(ivar.ne.4) return
 
 !********************************************************************
-400	continue
 	do k=kstat,nkm1
 !$OMP PARALLEL PRIVATE(tulc, tvlc, twlc)
 !$OMP DO
@@ -51,10 +50,5 @@ module revision
 	enddo
 !$OMP END PARALLEL
 	enddo
-	return
-
-!********************************************************************
-500	return
-	
 end subroutine revision_p
 end module revision

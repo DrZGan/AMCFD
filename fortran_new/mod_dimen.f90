@@ -127,8 +127,6 @@ subroutine pool_size
 	istatp1=istat+1
 	iendm1=iend-1
 
-	return
-
 end subroutine pool_size
 
 end module dimensions
