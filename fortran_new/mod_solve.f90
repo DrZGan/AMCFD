@@ -7,6 +7,9 @@ module solver
 	use parameters
 	use dimensions
 	
+	! Set .true. to use tdma_solve_3d_2 for comparison; .false. = original tdma_solve_3d
+	logical, parameter :: use_tdma2 = .true.
+	
 	contains
 
 !********************************************************************
@@ -58,16 +61,94 @@ subroutine tdma_solve_3d(field, klo, khi, jlo, jhi, ibc, ilo, ihi)
 	enddo
 end subroutine tdma_solve_3d
 
+
+
+subroutine tdma_solve_3d_2(field, klo, khi, jlo, jhi, ibc, ilo, ihi)
+	use omp_lib
+	implicit none
+	real(wp), intent(inout) :: field(nx,ny,nz)
+	integer, intent(in) :: klo, khi, jlo, jhi, ibc, ilo, ihi
+  
+	integer :: i, j, k, ksweep
+	integer :: nth, tid
+	real(wp), allocatable :: prbuf(:,:), qrbuf(:,:)   ! per-thread buffers
+	real(wp) :: d, denom
+	integer :: nthreads
+  
+	! determine number of threads to allocate buffers for
+	!$OMP PARALLEL
+	!$OMP MASTER
+	  nthreads = omp_get_num_threads()
+	!$OMP END MASTER
+	!$OMP END PARALLEL
+  
+	if (nthreads < 1) nthreads = 1
+	allocate(prbuf(nx, nthreads))
+	allocate(qrbuf(nx, nthreads))
+  
+	!$OMP PARALLEL DEFAULT(NONE) &
+	!$OMP SHARED(field,prbuf,qrbuf,klo,khi,jlo,jhi,ibc,ilo,ihi,at,ab,an,as,ae,aw,ap,su) &
+	!$OMP PRIVATE(tid,k,j,i,ksweep,d,denom)
+	  tid = omp_get_thread_num() + 1  ! Fortran 1-based index for buffer
+	  do ksweep = 1, 2
+		do k = khi, klo, -1
+		  !$OMP DO SCHEDULE(STATIC)
+		  do j = jlo, jhi
+			prbuf(ibc, tid) = 0.0_wp
+			qrbuf(ibc, tid) = field(ibc, j, k)
+  
+			! forward sweep along i; make it vector-friendly
+			do i = ilo, ihi
+			  d = at(i,j,k)*field(i,j,k+1) + ab(i,j,k)*field(i,j,k-1) &
+				  + an(i,j,k)*field(i,j+1,k) + as(i,j,k)*field(i,j-1,k) + su(i,j,k)
+  
+			  denom = ap(i,j,k) - aw(i,j,k)*prbuf(i-1, tid)
+  
+			  ! clamp denom away from zero (branch-free style)
+			  if (abs(denom) < 1.0e-12_wp) then
+				 denom = sign(1.0e-12_wp, denom)    ! preserves sign
+			  end if
+  
+			  prbuf(i, tid) = ae(i,j,k) / denom
+			  qrbuf(i, tid) = (d + aw(i,j,k) * qrbuf(i-1, tid)) / denom
+			end do
+  
+			! back substitution (i decreasing)
+			do i = ihi, ilo, -1
+			  field(i,j,k) = prbuf(i, tid) * field(i+1,j,k) + qrbuf(i, tid)
+			end do
+		  end do   ! j
+		  !$OMP END DO
+		  !$OMP BARRIER
+		end do   ! k
+	  end do   ! ksweep
+	!$OMP END PARALLEL
+  
+	deallocate(prbuf, qrbuf)
+  end subroutine tdma_solve_3d_2
+
+
+
+
+
 !********************************************************************
-! Convenience wrappers that call tdma_solve_3d with correct bounds
+! Convenience wrappers: call tdma_solve_3d or tdma_solve_3d_2 per use_tdma2
 !********************************************************************
 subroutine solution_uvw(field)
 	real(wp), intent(inout) :: field(nx,ny,nz)
-	call tdma_solve_3d(field, kstat, nkm1, jstat, jend, istat, istatp1, iendm1)
+	if (use_tdma2) then
+		call tdma_solve_3d_2(field, kstat, nkm1, jstat, jend, istat, istatp1, iendm1)
+	else
+		call tdma_solve_3d(field, kstat, nkm1, jstat, jend, istat, istatp1, iendm1)
+	endif
 end subroutine solution_uvw
 
 subroutine solution_enthalpy
-	call tdma_solve_3d(enthalpy, 2, nkm1, 2, njm1, 1, 2, nim1)
+	if (use_tdma2) then
+		call tdma_solve_3d_2(enthalpy, 2, nkm1, 2, njm1, 1, 2, nim1)
+	else
+		call tdma_solve_3d(enthalpy, 2, nkm1, 2, njm1, 1, 2, nim1)
+	endif
 end subroutine solution_enthalpy
 
 
