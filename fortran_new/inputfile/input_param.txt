@@ -25,3 +25,5 @@
 &boundary_conditions   htci=5, htcj=5, htck1=5, htckn=5, tempWest=293, tempEast=293, 
 	tempNorth=293,	tempBottom=293,	tempPreheat=293, tempAmb=293  /
 
+&local_solver localnum=5, local_half_x=1.0e-3, local_half_y=2.0e-4, local_depth_z=2.0e-4 /
+

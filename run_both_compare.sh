@@ -41,26 +41,19 @@ rm -f "$BASEDIR/fortran_new/result/output.txt" "$BASEDIR/fortran_new/result/"*.v
 rm -f "$BASEDIR/fortran_origin/result/output.txt" "$BASEDIR/fortran_origin/result/"*.vtk
 
 echo ""
-echo "5. Running both simulations..."
+echo "5. Running simulations (one after the other, so origin time is independent of localnum)..."
 cd "$BASEDIR/fortran_origin"
 t0_orig=$(date +%s.%N)
-./cluster_main > /dev/null 2>&1 &
-ORIG_PID=$!
-echo "   fortran_origin PID=$ORIG_PID"
-cd "$BASEDIR/fortran_new"
-t0_new=$(date +%s.%N)
-./cluster_main > /dev/null 2>&1 &
-NEW_PID=$!
-echo "   fortran_new    PID=$NEW_PID"
-echo "   Waiting for both to finish..."
-wait $NEW_PID 2>/dev/null
-t1_new=$(date +%s.%N)
-new_wall=$(awk "BEGIN {printf \"%.1f\", $t1_new - $t0_new}")
-echo "   fortran_new    finished in ${new_wall}s"
-wait $ORIG_PID 2>/dev/null
+./cluster_main > /dev/null 2>&1
 t1_orig=$(date +%s.%N)
 orig_wall=$(awk "BEGIN {printf \"%.1f\", $t1_orig - $t0_orig}")
 echo "   fortran_origin finished in ${orig_wall}s"
+cd "$BASEDIR/fortran_new"
+t0_new=$(date +%s.%N)
+./cluster_main > /dev/null 2>&1
+t1_new=$(date +%s.%N)
+new_wall=$(awk "BEGIN {printf \"%.1f\", $t1_new - $t0_new}")
+echo "   fortran_new    finished in ${new_wall}s"
 
 echo ""
 echo "=============================================="

@@ -36,6 +36,7 @@ module field_data
 
 	! Solid field tracking
 	real(wp), allocatable :: solidfield(:,:,:)
+	real(wp), allocatable :: localfield(:,:,:)
 
 	contains
 
@@ -48,6 +49,8 @@ subroutine allocate_field_data(nni, nnj, nnk)
 	allocate(temp(nni,nnj,nnk), tnot(nni,nnj,nnk))
 	allocate(fracl(nni,nnj,nnk), fraclnot(nni,nnj,nnk))
 	allocate(solidfield(nni,nnj,nnk))
+	allocate(localfield(nni,nnj,nnk))
+	localfield = 0.0_wp
 end subroutine allocate_field_data
 
 subroutine deallocate_field_data()
@@ -56,6 +59,7 @@ subroutine deallocate_field_data()
 	if (allocated(enthalpy)) deallocate(enthalpy,hnot,temp,tnot)
 	if (allocated(fracl)) deallocate(fracl,fraclnot)
 	if (allocated(solidfield)) deallocate(solidfield)
+	if (allocated(localfield)) deallocate(localfield)
 end subroutine deallocate_field_data
 
 !********************************************************************

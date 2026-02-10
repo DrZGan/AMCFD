@@ -29,9 +29,13 @@ program main
 	use laserinput
 	use toolpath
 	use timing
+	use local_enthalpy
 
 	implicit none
 	integer i,j,k
+	integer step_idx
+	integer ilo, ihi, jlo, jhi, klo, khi
+	logical is_local
 	real(wp) amaxres
 	real(wp) t0, t1
 
@@ -49,11 +53,13 @@ program main
 	call StartTime
 
 	itertot=0
+	step_idx=0
 	timet=small
 
 !------time stepping loop------------------------------------
 	time_loop: do while (timet.lt.timax)
 		timet=timet+delt
+		step_idx = step_idx + 1
 		niter=0
 
 !-------Move laser and calculate freesurface-----------------
@@ -61,6 +67,8 @@ program main
 		call laser_beam
 		call read_coordinates
 !		call calcRHF   ! RHF disabled
+		call get_enthalpy_region(step_idx, is_local, ilo, ihi, jlo, jhi, klo, khi)
+		call update_localfield(ilo, ihi, jlo, jhi, klo, khi)
 		call cpu_time(t1)
 		t_laser = t_laser + (t1 - t0)
 
@@ -76,40 +84,40 @@ program main
 			t_prop = t_prop + (t1 - t0)
 
 			call cpu_time(t0)
-			call bound_enthalpy
+			call bound_enthalpy(ilo, ihi, jlo, jhi, klo, khi, is_local)
 			call cpu_time(t1)
 			t_bound = t_bound + (t1 - t0)
 
 			call cpu_time(t0)
-			call discretize_enthalpy
+			call discretize_enthalpy(ilo, ihi, jlo, jhi, klo, khi)
 			call cpu_time(t1)
 			t_discret = t_discret + (t1 - t0)
 			t_discret_enthalpy = t_discret_enthalpy + (t1 - t0)
 
 			call cpu_time(t0)
-			call source_enthalpy
+			call source_enthalpy(ilo, ihi, jlo, jhi, klo, khi)
 			call cpu_time(t1)
 			t_sour = t_sour + (t1 - t0)
 			t_sour_enthalpy = t_sour_enthalpy + (t1 - t0)
 
 			call cpu_time(t0)
-			call calc_enthalpy_residual
+			call calc_enthalpy_residual(ilo, ihi, jlo, jhi, klo, khi)
 			call cpu_time(t1)
 			t_resid = t_resid + (t1 - t0)
 
 			call cpu_time(t0)
-			call enhance_converge_speed
+			call enhance_converge_speed(ilo, ihi, jlo, jhi, klo, khi)
 			call cpu_time(t1)
 			t_converge = t_converge + (t1 - t0)
 
 			call cpu_time(t0)
-			call solution_enthalpy
+			call solution_enthalpy(ilo, ihi, jlo, jhi, klo, khi)
 			call cpu_time(t1)
 			t_solve = t_solve + (t1 - t0)
 			t_solve_enthalpy = t_solve_enthalpy + (t1 - t0)
 
 			call cpu_time(t0)
-			call enthalpy_to_temp
+			call enthalpy_to_temp(ilo, ihi, jlo, jhi, klo, khi)
 			call cpu_time(t1)
 			t_entot = t_entot + (t1 - t0)
 

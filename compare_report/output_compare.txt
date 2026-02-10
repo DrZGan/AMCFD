@@ -2,21 +2,21 @@ output.txt comparison (all time-step blocks)
   Blocks: origin=25  new=25  OK
   Average over blocks (origin vs new) and rel_diff of averages:
     time          avg_origin=2.610000e-04  avg_new=2.610000e-04  rel_diff_avg=0.000e+00
-    iter          avg_origin=4.888000e+01  avg_new=4.900000e+01  rel_diff_avg=2.455e-03
-    time/iter     avg_origin=4.564000e-02  avg_new=3.148000e-02  rel_diff_avg=3.103e-01
-    tot_iter      avg_origin=6.220000e+02  avg_new=6.250000e+02  rel_diff_avg=4.823e-03
-    res_enth      avg_origin=6.885760e-06  avg_new=6.425680e-06  rel_diff_avg=6.682e-02
-    res_mass      avg_origin=4.661960e-02  avg_new=4.961800e-02  rel_diff_avg=6.432e-02
-    res_u         avg_origin=8.847382e+00  avg_new=2.175465e+00  rel_diff_avg=7.541e-01
-    res_v         avg_origin=9.637084e+00  avg_new=2.437324e+00  rel_diff_avg=7.471e-01
-    res_w         avg_origin=5.609851e+01  avg_new=9.386788e+00  rel_diff_avg=8.327e-01
-    Tmax          avg_origin=2.852464e+03  avg_new=2.854634e+03  rel_diff_avg=7.606e-04
-    umax          avg_origin=7.283520e-01  avg_new=7.318680e-01  rel_diff_avg=4.827e-03
-    vmax          avg_origin=9.902633e-01  avg_new=9.988615e-01  rel_diff_avg=8.683e-03
-    wmax          avg_origin=5.818152e-01  avg_new=5.829748e-01  rel_diff_avg=1.993e-03
-    length        avg_origin=3.000400e-04  avg_new=3.000080e-04  rel_diff_avg=1.067e-04
+    iter          avg_origin=4.888000e+01  avg_new=4.904000e+01  rel_diff_avg=3.273e-03
+    time/iter     avg_origin=4.100000e-02  avg_new=1.156000e-02  rel_diff_avg=7.180e-01
+    tot_iter      avg_origin=6.220000e+02  avg_new=6.260000e+02  rel_diff_avg=6.431e-03
+    res_enth      avg_origin=6.909760e-06  avg_new=1.407386e-04  rel_diff_avg=1.937e+01
+    res_mass      avg_origin=4.641960e-02  avg_new=4.693520e-02  rel_diff_avg=1.111e-02
+    res_u         avg_origin=1.044957e+01  avg_new=2.107488e+00  rel_diff_avg=7.983e-01
+    res_v         avg_origin=8.838304e+00  avg_new=2.393812e+00  rel_diff_avg=7.292e-01
+    res_w         avg_origin=3.928996e+01  avg_new=5.809183e+00  rel_diff_avg=8.521e-01
+    Tmax          avg_origin=2.853688e+03  avg_new=2.853929e+03  rel_diff_avg=8.424e-05
+    umax          avg_origin=7.240320e-01  avg_new=7.318280e-01  rel_diff_avg=1.077e-02
+    vmax          avg_origin=9.882976e-01  avg_new=9.934335e-01  rel_diff_avg=5.197e-03
+    wmax          avg_origin=5.787352e-01  avg_new=5.814952e-01  rel_diff_avg=4.769e-03
+    length        avg_origin=3.042000e-04  avg_new=3.000160e-04  rel_diff_avg=1.375e-02
     depth         avg_origin=1.062400e-04  avg_new=1.062400e-04  rel_diff_avg=0.000e+00
-    width         avg_origin=4.432372e-05  avg_new=4.789600e-05  rel_diff_avg=8.060e-02
+    width         avg_origin=4.430276e-05  avg_new=4.804293e-05  rel_diff_avg=8.442e-02
     north         avg_origin=0.000000e+00  avg_new=0.000000e+00  rel_diff_avg=0.000e+00
     south         avg_origin=0.000000e+00  avg_new=0.000000e+00  rel_diff_avg=0.000e+00
     top           avg_origin=0.000000e+00  avg_new=0.000000e+00  rel_diff_avg=0.000e+00
@@ -25,10 +25,10 @@ output.txt comparison (all time-step blocks)
     west          avg_origin=0.000000e+00  avg_new=0.000000e+00  rel_diff_avg=0.000e+00
     east          avg_origin=0.000000e+00  avg_new=0.000000e+00  rel_diff_avg=0.000e+00
     hout          avg_origin=0.000000e+00  avg_new=0.000000e+00  rel_diff_avg=0.000e+00
-    accu          avg_origin=1.089880e+02  avg_new=1.077920e+02  rel_diff_avg=1.097e-02
+    accu          avg_origin=1.089400e+02  avg_new=1.087240e+02  rel_diff_avg=1.983e-03
     hin           avg_origin=0.000000e+00  avg_new=0.000000e+00  rel_diff_avg=0.000e+00
     heatvol       avg_origin=1.057000e+02  avg_new=1.057000e+02  rel_diff_avg=0.000e+00
-    ratio         avg_origin=9.696000e-01  avg_new=9.804000e-01  rel_diff_avg=1.114e-02
+    ratio         avg_origin=9.704000e-01  avg_new=9.740000e-01  rel_diff_avg=3.710e-03
     beam_posx     avg_origin=8.198000e-04  avg_new=8.198000e-04  rel_diff_avg=0.000e+00
     beam_posy     avg_origin=5.000000e-04  avg_new=5.000000e-04  rel_diff_avg=0.000e+00
     beam_posz     avg_origin=7.000000e-04  avg_new=7.000000e-04  rel_diff_avg=0.000e+00
@@ -40,13 +40,13 @@ output.txt comparison (all time-step blocks)
   Conclusion: PASS
   Reason: Block counts match and key fields (time, Tmax, tot_iter, geometry, fluxes) have rel_diff_avg <= 10%. Residual and time/iter differences are acceptable (solver/implementation).
   First few mismatches (block, field, origin, new):
-    block 0  time/iter  4.500000e-02  4.000000e-02
-    block 0  res_mass  4.900000e-04  4.500000e-04
-    block 0  res_u  3.400000e-04  1.300000e-04
-    block 0  res_v  6.700000e-07  6.300000e-06
-    block 0  res_w  2.900000e-04  9.500000e-05
-    block 0  vmax  1.440000e-06  3.770000e-05
-    block 1  time/iter  5.600000e-02  2.700000e-02
-    block 1  res_enth  5.100000e-06  1.000000e-05
-    block 1  res_mass  1.400000e-01  1.300000e-01
-    block 1  res_u  7.900000e-02  1.000000e-01
+    block 0  time/iter  4.500000e-02  0.000000e+00
+    block 0  res_enth  4.400000e-08  6.500000e-08
+    block 0  res_mass  4.900000e-04  3.800000e-04
+    block 0  res_u  3.400000e-04  9.600000e-05
+    block 0  res_v  3.600000e-07  3.900000e-06
+    block 0  res_w  3.000000e-04  8.700000e-05
+    block 0  vmax  1.010000e-06  3.650000e-05
+    block 1  time/iter  4.200000e-02  0.000000e+00
+    block 1  res_enth  5.100000e-06  3.800000e-04
+    block 1  res_mass  1.500000e-01  1.300000e-01

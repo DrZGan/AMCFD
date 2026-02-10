@@ -1,0 +1,21 @@
+==============================================
+  localnum=0..5 Verification Report
+  Generated: 2026-02-10T01:34:35-07:00
+  Local solver: local_half_x=1e-3, local_half_y=2e-4, local_depth_z=2e-4
+  Origin run once; new run per localnum (comparison vs same origin result)
+==============================================
+
+  localnum   origin(s)      new(s)    new_CPU(s)  output    vtk     
+  -------------------------------------------------------------------------
+         0        51.9        36.1       350.494  PASS      PASS    
+         1        51.9        25.7       220.798  PASS      PASS    
+         2        51.9        22.6       176.484  PASS      PASS    
+         3        51.9        19.9       152.710  PASS      PASS    
+         4        51.9        19.8       146.442  PASS      PASS    
+         5        51.9        18.8       132.647  PASS      PASS    
+
+==============================================
+  End of report. Last comparison details:
+    /mnt/l/coding projects/AMCFD project/AMCFD-FORTRAN new/AMCFD/compare_report/output_compare.txt
+    /mnt/l/coding projects/AMCFD project/AMCFD-FORTRAN new/AMCFD/compare_report/vtk_compare.txt
+==============================================

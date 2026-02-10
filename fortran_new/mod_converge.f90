@@ -8,8 +8,9 @@ module convergence
 
 	contains
 
-subroutine enhance_converge_speed   
+subroutine enhance_converge_speed(ilo, ihi, jlo, jhi, klo, khi)
 	implicit none
+	integer, intent(in) :: ilo, ihi, jlo, jhi, klo, khi
 	integer i,j,k
 	real(wp), allocatable :: bl(:),blp(:),blm(:),blc(:),delh(:),pib(:),qib(:)
 	real(wp) denom
@@ -24,11 +25,11 @@ subroutine enhance_converge_speed
 	blm(1:ni)=0.0
 	blc(1:ni)=0.0
 
-	do k=2,nkm1
+	do k=klo,khi
 !$OMP PARALLEL 
 !$OMP DO REDUCTION(+: bl, blp, blm, blc)
-	do j=2,njm1
-	do i=2,nim1
+	do j=jlo,jhi
+	do i=ilo,ihi
 	
 	bl(i)=bl(i)+ap(i,j,k)-an(i,j,k)-as(i,j,k)-at(i,j,k)-ab(i,j,k)
 		blp(i)=blp(i)+ae(i,j,k)
@@ -41,26 +42,26 @@ subroutine enhance_converge_speed
 !$OMP END PARALLEL
 	enddo
 
-	pib(2)=blp(2)/bl(2)
-	qib(2)=blc(2)/bl(2)
+	pib(ilo)=blp(ilo)/bl(ilo)
+	qib(ilo)=blc(ilo)/bl(ilo)
 
-	do i=3,nim1
+	do i=ilo+1,ihi
 		denom=bl(i)-blm(i)*pib(i-1)
 		pib(i)=blp(i)/denom
 		qib(i)=(blc(i)+blm(i)*qib(i-1))/denom
 	enddo
 
-	delh(nim1)=qib(nim1)
+	delh(ihi)=qib(ihi)
 
-	do i=nim1-1,2,-1
+	do i=ihi-1,ilo,-1
 		delh(i)=pib(i)*delh(i+1)+qib(i)
 	enddo
 
-	do k=2,nkm1
+	do k=klo,khi
 !$OMP PARALLEL 
 !$OMP DO
-	do j=2,njm1
-	do i=2,nim1
+	do j=jlo,jhi
+	do i=ilo,ihi
 		enthalpy(i,j,k)=enthalpy(i,j,k)+delh(i)
 	enddo
 	enddo

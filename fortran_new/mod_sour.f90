@@ -163,16 +163,17 @@ subroutine source_pp
 end subroutine source_pp
 
 !********************************************************************
-subroutine source_enthalpy
+subroutine source_enthalpy(ilo, ihi, jlo, jhi, klo, khi)
+	integer, intent(in) :: ilo, ihi, jlo, jhi, klo, khi
 	integer i,j,k
 	real(wp) volht,flew,flns,fltb
 
 !-----source term + latent heat (merged into one pass for better cache use)------
-	do k=2,nkm1
+	do k=klo,khi
 !$OMP PARALLEL PRIVATE(volht, flew, flns, fltb)
 !$OMP DO
-	do j=2,njm1
-	do i=2,nim1
+	do j=jlo,jhi
+	do i=ilo,ihi
 		if(toolmatrix(PathNum,5) .gt. laser_on_threshold)then
 			if(z(nk)-z(k).le.sourcedepth) then
 				sourceinput(i,j,k)=alaspowvol*alasfact/pi/sourcerad**2/sourcedepth*alasetavol*&
@@ -200,47 +201,47 @@ subroutine source_enthalpy
 
 !----- boundary condition transfers ------
 !----- k=nk & k=1 ------
-	do j=2,njm1
-	do i=2,nim1
-		su(i,j,2)=su(i,j,2)+ab(i,j,2)*enthalpy(i,j,1)
-		sp(i,j,2)=sp(i,j,2)-ab(i,j,2)
-		ab(i,j,2)=0.0
-		su(i,j,nkm1)=su(i,j,nkm1)+at(i,j,nkm1)*enthalpy(i,j,nk)
-		sp(i,j,nkm1)=sp(i,j,nkm1)-at(i,j,nkm1)
-		at(i,j,nkm1)=0.0
+	do j=jlo,jhi
+	do i=ilo,ihi
+		su(i,j,klo)=su(i,j,klo)+ab(i,j,klo)*enthalpy(i,j,klo-1)
+		sp(i,j,klo)=sp(i,j,klo)-ab(i,j,klo)
+		ab(i,j,klo)=0.0
+		su(i,j,khi)=su(i,j,khi)+at(i,j,khi)*enthalpy(i,j,khi+1)
+		sp(i,j,khi)=sp(i,j,khi)-at(i,j,khi)
+		at(i,j,khi)=0.0
 	enddo
 	enddo
 
 !----- j=1 & j=nj ------
-	do k=2,nkm1
-	do i=2,nim1
-		su(i,2,k)=su(i,2,k)+as(i,2,k)*enthalpy(i,1,k)
-		sp(i,2,k)=sp(i,2,k)-as(i,2,k)
-		as(i,2,k)=0.0
-		su(i,njm1,k)=su(i,njm1,k)+an(i,njm1,k)*enthalpy(i,nj,k)
-		sp(i,njm1,k)=sp(i,njm1,k)-an(i,njm1,k)
-		an(i,njm1,k)=0.0
+	do k=klo,khi
+	do i=ilo,ihi
+		su(i,jlo,k)=su(i,jlo,k)+as(i,jlo,k)*enthalpy(i,jlo-1,k)
+		sp(i,jlo,k)=sp(i,jlo,k)-as(i,jlo,k)
+		as(i,jlo,k)=0.0
+		su(i,jhi,k)=su(i,jhi,k)+an(i,jhi,k)*enthalpy(i,jhi+1,k)
+		sp(i,jhi,k)=sp(i,jhi,k)-an(i,jhi,k)
+		an(i,jhi,k)=0.0
 	enddo
 	enddo
 
 !----- i=1 & i=ni---
-	do k=2,nkm1
-	do j=2,njm1
-		su(2,j,k)=su(2,j,k)+aw(2,j,k)*enthalpy(1,j,k)
-		sp(2,j,k)=sp(2,j,k)-aw(2,j,k)
-		aw(2,j,k)=0.0
-		su(nim1,j,k)=su(nim1,j,k)+ae(nim1,j,k)*enthalpy(ni,j,k)
-		sp(nim1,j,k)=sp(nim1,j,k)-ae(nim1,j,k)
-		ae(nim1,j,k)=0.0
+	do k=klo,khi
+	do j=jlo,jhi
+		su(ilo,j,k)=su(ilo,j,k)+aw(ilo,j,k)*enthalpy(ilo-1,j,k)
+		sp(ilo,j,k)=sp(ilo,j,k)-aw(ilo,j,k)
+		aw(ilo,j,k)=0.0
+		su(ihi,j,k)=su(ihi,j,k)+ae(ihi,j,k)*enthalpy(ihi+1,j,k)
+		sp(ihi,j,k)=sp(ihi,j,k)-ae(ihi,j,k)
+		ae(ihi,j,k)=0.0
 	enddo
 	enddo
 
 !-----assembly and under-relaxation------
-	do k=2,nkm1
+	do k=klo,khi
 !$OMP PARALLEL
 !$OMP DO
-	do j=2,njm1
-	do i=2,nim1
+	do j=jlo,jhi
+	do i=ilo,ihi
 		ap(i,j,k)=an(i,j,k)+as(i,j,k)+ae(i,j,k)+aw(i,j,k)+at(i,j,k)+ab(i,j,k)+apnot(i,j,k)-sp(i,j,k)
 !-----under-relaxation---
 		ap(i,j,k)=ap(i,j,k)/urfh

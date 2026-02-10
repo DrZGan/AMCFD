@@ -68,14 +68,16 @@ subroutine bound_pp
 end subroutine bound_pp
 
 !********************************************************************
-subroutine bound_enthalpy
+subroutine bound_enthalpy(ilo, ihi, jlo, jhi, klo, khi, is_local)
+	integer, intent(in) :: ilo, ihi, jlo, jhi, klo, khi
+	logical, intent(in) :: is_local
 	integer i,j,k
 	real(wp) ctmp1,hlossradia,hlossconvec
 
-!-----k=nk top surface
+!-----k=nk top surface (always apply)
 	ahtoploss=0.0
-	do j=2,njm1
-	do i=2,nim1
+	do j=jlo,jhi
+	do i=ilo,ihi
 		hlossradia=emiss*sigm*(temp(i,j,nk)**4-tempAmb**4)
 		hlossconvec=htckn*(temp(i,j,nk)-tempAmb)
 		ctmp1=diff(i,j,nkm1)*dzpbinv(nk)
@@ -84,40 +86,64 @@ subroutine bound_enthalpy
 	enddo
 	enddo
 
+	if (is_local) then
+!-----local mode: non-top boundaries are adiabatic (zero normal gradient)
+		do j=jlo,jhi
+		do i=ilo,ihi
+			enthalpy(i,j,klo-1)=enthalpy(i,j,klo)
+			enthalpy(i,j,khi+1)=enthalpy(i,j,khi)
+		enddo
+		enddo
+
+		do k=klo,khi
+		do j=jlo,jhi
+			enthalpy(ilo-1,j,k)=enthalpy(ilo,j,k)
+			enthalpy(ihi+1,j,k)=enthalpy(ihi,j,k)
+		enddo
+		enddo
+
+		do k=klo,khi
+		do i=ilo,ihi
+			enthalpy(i,jlo-1,k)=enthalpy(i,jlo,k)
+			enthalpy(i,jhi+1,k)=enthalpy(i,jhi,k)
+		enddo
+		enddo
+	else
 !-----k=1 bottom surface
-	do j=2,njm1
-	do i=2,nim1
-		hlossconvec=htck1*(temp(i,j,1)-tempAmb)+emiss*sigm*(temp(i,j,1)**4-tempAmb**4)
-		ctmp1=diff(i,j,2)*dzpbinv(2)
-		enthalpy(i,j,1)=enthalpy(i,j,2)-hlossconvec/ctmp1
-	enddo
-	enddo
+		do j=jlo,jhi
+		do i=ilo,ihi
+			hlossconvec=htck1*(temp(i,j,1)-tempAmb)+emiss*sigm*(temp(i,j,1)**4-tempAmb**4)
+			ctmp1=diff(i,j,2)*dzpbinv(2)
+			enthalpy(i,j,1)=enthalpy(i,j,2)-hlossconvec/ctmp1
+		enddo
+		enddo
 
 !-----west and east
-	do j=2,njm1
-	do k=2,nkm1
-		hlossconvec=htci*(temp(1,j,k)-tempAmb)
-		ctmp1=diff(2,j,k)*dxpwinv(2)
-		enthalpy(1,j,k)=enthalpy(2,j,k)-hlossconvec/ctmp1
+		do j=jlo,jhi
+		do k=klo,khi
+			hlossconvec=htci*(temp(1,j,k)-tempAmb)
+			ctmp1=diff(2,j,k)*dxpwinv(2)
+			enthalpy(1,j,k)=enthalpy(2,j,k)-hlossconvec/ctmp1
 
-		hlossconvec=htci*(temp(ni,j,k)-tempAmb)
-		ctmp1=diff(nim1,j,k)*dxpwinv(nim1)
-		enthalpy(ni,j,k)=enthalpy(nim1,j,k)-hlossconvec/ctmp1
-	enddo
-	enddo
+			hlossconvec=htci*(temp(ni,j,k)-tempAmb)
+			ctmp1=diff(nim1,j,k)*dxpwinv(nim1)
+			enthalpy(ni,j,k)=enthalpy(nim1,j,k)-hlossconvec/ctmp1
+		enddo
+		enddo
 
 !-----north and south
-	do i=2,nim1
-	do k=2,nkm1
-		hlossconvec=htcj*(temp(i,1,k)-tempAmb)
-		ctmp1=diff(i,2,k)*dypsinv(2)
-		enthalpy(i,1,k)=enthalpy(i,2,k)-hlossconvec/ctmp1
+		do i=ilo,ihi
+		do k=klo,khi
+			hlossconvec=htcj*(temp(i,1,k)-tempAmb)
+			ctmp1=diff(i,2,k)*dypsinv(2)
+			enthalpy(i,1,k)=enthalpy(i,2,k)-hlossconvec/ctmp1
 
-		hlossconvec=htcj*(temp(i,nj,k)-tempAmb)
-		ctmp1=diff(i,njm1,k)*dypsinv(njm1)
-		enthalpy(i,nj,k)=enthalpy(i,njm1,k)-hlossconvec/ctmp1
-	enddo
-	enddo
+			hlossconvec=htcj*(temp(i,nj,k)-tempAmb)
+			ctmp1=diff(i,njm1,k)*dypsinv(njm1)
+			enthalpy(i,nj,k)=enthalpy(i,njm1,k)-hlossconvec/ctmp1
+		enddo
+		enddo
+	endif
 end subroutine bound_enthalpy
 
 end module boundary

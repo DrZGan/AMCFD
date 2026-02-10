@@ -8,17 +8,18 @@ module entotemp
 	use dimensions
 
 	contains
-	subroutine enthalpy_to_temp
+subroutine enthalpy_to_temp(ilo, ihi, jlo, jhi, klo, khi)
 	implicit none
+	integer, intent(in) :: ilo, ihi, jlo, jhi, klo, khi
 	integer i,j,k
 
 
 
-	do k=1,nk
+	do k=max(1,klo-1),min(nk,khi+1)
 !$OMP PARALLEL
 !$OMP DO
-	do j=1,nj
-	do i=1,ni
+	do j=max(1,jlo-1),min(nj,jhi+1)
+	do i=max(1,ilo-1),min(ni,ihi+1)
 		if(enthalpy(i,j,k).ge.hlcal) then
 			fracl(i,j,k)=1.0
 			temp(i,j,k)=(enthalpy(i,j,k)-hlcal)/acpl+tliquid

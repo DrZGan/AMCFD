@@ -20,6 +20,7 @@ gfortran -fopenmp -O3 -march=native -c \
     mod_field_data.f90 \
     mod_coeff_data.f90 \
     mod_sim_state.f90 \
+    mod_local_enthalpy.f90 \
     mod_init.f90 \
     mod_laser.f90 \
     mod_dimen.f90 \
