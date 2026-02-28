@@ -306,17 +306,16 @@ subroutine discretize_pp
 end subroutine discretize_pp
 
 !********************************************************************
-subroutine discretize_enthalpy(ilo, ihi, jlo, jhi, klo, khi)
-	integer, intent(in) :: ilo, ihi, jlo, jhi, klo, khi
+subroutine discretize_enthalpy
 	integer i,j,k
 	real(wp) vn,vs,ue,uw,wt,wb,fn,fs,fe,fw,ft,fb
 	real(wp) difn,dife,dift,dn,de,dt,ds,dw,db,tmp1
 
-	do k=klo,khi
+	do k=2,nkm1
 !$OMP PARALLEL PRIVATE(vn, ue, wt, fn, fe, ft, difn, dife, dift, dn, de, dt, tmp1)
 !$OMP DO
-	do j=jlo,jhi
-	do i=ilo,ihi
+	do j=2,njm1
+	do i=2,nim1
 		vn = vVel(i,j+1,k)
 		ue = uVel(i+1,j,k)
 		wt = wVel(i,j,k+1)
@@ -367,9 +366,9 @@ subroutine discretize_enthalpy(ilo, ihi, jlo, jhi, klo, khi)
 !$OMP END PARALLEL
 	enddo
 
-	j=jlo
-	do k=klo,khi
-		do i=ilo,ihi
+	j=2
+	do k=2,nkm1
+		do i=2,nim1
 			vs = vVel(i,j,k)
 			fs = den(i,j,k)*vs*areaik(i,k)
 			ds = diff(i,j,k)*areaik(i,k)*dypsinv(j)
@@ -377,9 +376,9 @@ subroutine discretize_enthalpy(ilo, ihi, jlo, jhi, klo, khi)
 		enddo
 	enddo
 
-	i=ilo
-	do k=klo,khi
-		do j=jlo,jhi
+	i=2
+	do k=2,nkm1
+		do j=2,njm1
 			uw = uVel(i,j,k)
 			fw = den(i,j,k)*uw*areajk(j,k)
 			dw = diff(i,j,k)*areajk(j,k)*dxpwinv(i)
@@ -387,9 +386,9 @@ subroutine discretize_enthalpy(ilo, ihi, jlo, jhi, klo, khi)
 		enddo
 	enddo
 
-	k=klo
-	do j=jlo,jhi
-		do i=ilo,ihi
+	k=2
+	do j=2,njm1
+		do i=2,nim1
 			wb = wVel(i,j,k)
 			fb = den(i,j,k)*wb*areaij(i,j)
 			db = diff(i,j,k)*areaij(i,j)*dzpbinv(k)

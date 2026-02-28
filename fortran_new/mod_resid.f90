@@ -72,19 +72,18 @@ subroutine calc_pressure_residual
 end subroutine calc_pressure_residual
 
 !********************************************************************
-subroutine calc_enthalpy_residual(ilo, ihi, jlo, jhi, klo, khi)
-	integer, intent(in) :: ilo, ihi, jlo, jhi, klo, khi
+subroutine calc_enthalpy_residual
 	integer i,j,k
 	real(wp) sumd,sumh,resor
 
 	sumh=0.0
 	sumd=0.0
 
-	do k=klo,khi
+	do k=2,nkm1
 !$OMP PARALLEL PRIVATE(resor)
 !$OMP DO REDUCTION(+: sumd, sumh)
-	do j=jlo,jhi
-	do i=ilo,ihi
+	do j=2,njm1
+	do i=2,nim1
 		resor=(an(i,j,k)*enthalpy(i,j+1,k)+as(i,j,k)*enthalpy(i,j-1,k)+ae(i,j,k)*enthalpy(i+1,j,k)+ &
 			aw(i,j,k)*enthalpy(i-1,j,k)+at(i,j,k)*enthalpy(i,j,k+1)+ab(i,j,k)*enthalpy(i,j,k-1)+ &
 			su(i,j,k))/ap(i,j,k)-enthalpy(i,j,k)

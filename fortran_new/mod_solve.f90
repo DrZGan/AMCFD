@@ -148,14 +148,11 @@ subroutine solution_uvw(field)
 	endif
 end subroutine solution_uvw
 
-subroutine solution_enthalpy(ilo, ihi, jlo, jhi, klo, khi)
-	integer, intent(in) :: ilo, ihi, jlo, jhi, klo, khi
-	integer :: ibc
-	ibc = ilo - 1
+subroutine solution_enthalpy
 	if (use_tdma2) then
-		call tdma_solve_3d_2(enthalpy, klo, khi, jlo, jhi, ibc, ilo, ihi)
+		call tdma_solve_3d_2(enthalpy, 2, nkm1, 2, njm1, 1, 2, nim1)
 	else
-		call tdma_solve_3d(enthalpy, klo, khi, jlo, jhi, ibc, ilo, ihi)
+		call tdma_solve_3d(enthalpy, 2, nkm1, 2, njm1, 1, 2, nim1)
 	endif
 end subroutine solution_enthalpy
 

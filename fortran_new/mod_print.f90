@@ -11,7 +11,6 @@ module printing
 	use parameters
 	use laserinput
 	use boundary
-	use field_data
 
 	implicit none
 	integer itertot,niter  !main   
@@ -230,7 +229,6 @@ subroutine Cust_Out
 	call write_vtk_scalar(41, 'diff', diff)
 	call write_vtk_scalar(41, 'den', den)
 	call write_vtk_scalar(41, 'solidID', solidfield)
-	call write_vtk_scalar(41, 'local', localfield)
 
 	close(41)
 
