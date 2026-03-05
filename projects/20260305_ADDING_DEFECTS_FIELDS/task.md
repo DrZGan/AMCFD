@@ -15,13 +15,13 @@ The module supports multiple defect computation methods, each with its own param
 ---
 
 ### Task 1 — Create `max_temp` Array
-- Allocate a `max_temp` array with the same shape as `temp` (one value per cell).
-- At every time step, for each cell: if the current temperature exceeds the recorded `max_temp`, update `max_temp` with the current temperature.
+- Allocate `max_temp` and `defect` arrays covering the **full X-Y control volume**, but only from `kmax` down to `layerheight` in Z (i.e., Z extent = one layer height). Defect computation is limited to this single-layer region.
+- At every time step, for each cell within this Z range: if the current temperature exceeds the recorded `max_temp`, update `max_temp` with the current temperature.
 
 ---
 
 ### Task 2 — Compute Defect Array (call after simulation completes)
-- Allocate `defect` array, initialized to `0`.
+- `defect` array is already allocated (see Task 1), initialized to `0`.
 - Apply the following rules cell by cell using `max_temp`:
   - If `max_temp < T_solid` → `defect = -1` (lack-of-fusion)
   - If `max_temp > T_boiling` → `defect = k_d * (max_temp - T_boiling) / T_boiling` (keyhole porosity)
