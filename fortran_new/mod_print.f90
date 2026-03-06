@@ -16,7 +16,8 @@ module printing
 	implicit none
 	integer itertot,niter  !main   
 
-	real(wp) aAveSec           !how many seconds are needed for each iteration
+	real(wp) aAveSec           !how many seconds are needed for each iteration (current time step)
+	real(wp) t_step_start      !cpu time at the start of current time step
 	real(wp), allocatable :: auvl(:,:,:),avvl(:,:,:),awvl(:,:,:)  ! velocity field at central nodes
 
 	integer, private:: i,j,k,ist,gridx, gridy, gridz ! calcu how many grids should be output in different axis
@@ -92,14 +93,11 @@ subroutine Cust_Out
 
 	character(len=10) outputfilename
 	integer outputnum
-	integer outputintervel
 	character( len = 3 ) :: cTemp
 	integer :: npts
 	real(kind=4) :: val4
 
 
-	outputintervel=5               ! reserve transient datas every XX time steps
-	
 	if(Mod(INT(timet/delt),outputintervel).ne.0)	return       
 
 	outputnum=INT(timet/delt)/outputintervel
@@ -281,12 +279,24 @@ end subroutine write_vtk_scalar
 
 
 !********************************************************************
+subroutine StartStepTime
+	use omp_lib
+	t_step_start = omp_get_wtime()
+end subroutine StartStepTime
+
 subroutine CalTime
+	use omp_lib
+	real(wp) :: t_step_end
 	integer isecused
 	call date_and_time(values = iTimeEnd)
 	iSecUsed=86400*(iTimeEnd(3)-iTimeStart(3))+3600*(iTimeEnd(5)-iTimeStart(5))+60* &    !calcu the time has been used
 		(iTimeEnd(6)-iTimeStart(6))+iTimeEnd(7)-iTimeStart(7)
-	aAveSec=real(iSecUsed,wp)/real(itertot,wp)     ! calcu how many seconds are needed for each iteration
+	t_step_end = omp_get_wtime()
+	if (niter > 0) then
+		aAveSec = (t_step_end - t_step_start) / real(niter, wp)
+	else
+		aAveSec = 0.0_wp
+	endif
 end subroutine CalTime
 
 !********************************************************************

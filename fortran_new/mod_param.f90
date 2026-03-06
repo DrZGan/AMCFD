@@ -28,7 +28,7 @@ module parameters
 	real(wp) local_half_x, local_half_y, local_depth_z
 	real(wp) xzone(nx1),yzone(ny1),zzone(nz1),powrx(nx1),powry(ny1),powrz(nz1)
 	real(wp) htci, htcj, htck1, htckn, tempWest, tempEast, tempNorth, tempBottom, tempPreheat, tempAmb	
-	integer nzx, nzy, nzz, maxit, localnum
+	integer nzx, nzy, nzz, maxit, localnum, outputintervel
 	integer ncvx(nx1),ncvy(ny1),ncvz(nz1)
 
 	namelist / process_parameters /alaspow, alaseta, alasrb, alasfact
@@ -40,6 +40,7 @@ module parameters
 	namelist / boundary_conditions / htci, htcj, htck1, htckn, tempWest, tempEast, tempNorth, &
 		tempBottom, tempPreheat, tempAmb
 	namelist / local_solver / localnum, local_half_x, local_half_y, local_depth_z
+	namelist / output_control / outputintervel
 
 	contains
 
@@ -84,6 +85,9 @@ subroutine read_data
 
 	READ (10, NML=local_solver)
 	! read two-level local solver parameters
+
+	READ (10, NML=output_control)
+	! read output control parameters
 
 	close(10)    ! close file 10
 	return

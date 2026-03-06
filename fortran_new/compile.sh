@@ -42,6 +42,4 @@ gfortran -fopenmp -O3 -march=native -c \
 # Link all object files
 gfortran -fopenmp -O3 -march=native *.o -o cluster_main
 
-echo "Build complete: cluster_main"
-echo ""
-echo "To run: export OMP_NUM_THREADS=12 && ./cluster_main"
+export OMP_NUM_THREADS=12 && ./cluster_main

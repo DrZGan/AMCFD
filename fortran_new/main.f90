@@ -61,6 +61,7 @@ program main
 		timet=timet+delt
 		step_idx = step_idx + 1
 		niter=0
+		call StartStepTime
 
 !-------Move laser and calculate freesurface-----------------
 		call cpu_time(t0)
@@ -72,6 +73,14 @@ program main
 		call cpu_time(t1)
 		t_laser = t_laser + (t1 - t0)
 
+		if (is_local) then
+			write(*,'(A,I6,A)')  '  Step', step_idx, ' => LOCAL enthalpy solve'
+			write(9,'(A,I6,A)') '  Step', step_idx, ' => LOCAL enthalpy solve'
+		else
+			write(*,'(A,I6,A)')  '  Step', step_idx, ' => GLOBAL enthalpy solve'
+			write(9,'(A,I6,A)') '  Step', step_idx, ' => GLOBAL enthalpy solve'
+		endif
+
 !-----iteration loop within each time step----------------
 		iter_loop: do while (niter.lt.maxit)
 			niter=niter+1
@@ -79,7 +88,7 @@ program main
 
 !-----solve energy equation (formerly ivar=5)-----
 			call cpu_time(t0)
-			call properties
+			call properties(ilo, ihi, jlo, jhi, klo, khi)
 			call cpu_time(t1)
 			t_prop = t_prop + (t1 - t0)
 
