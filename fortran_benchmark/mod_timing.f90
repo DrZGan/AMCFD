@@ -21,6 +21,18 @@ module timing
 	real(wp), save :: t_laser   = 0.0_wp   ! laser/toolpath (laser_beam, read_coordinates, calcRHF)
 	real(wp), save :: t_other   = 0.0_wp   ! copy loop and misc
 
+	! Heating / cooling stage wall-clock time
+	real(wp), save :: t_heating   = 0.0_wp   ! wall-clock time in laser-on steps
+	real(wp), save :: t_cooling   = 0.0_wp   ! wall-clock time in laser-off steps
+	integer,  save :: n_heating   = 0        ! number of laser-on time steps
+	integer,  save :: n_cooling   = 0        ! number of laser-off time steps
+
+	! Local / global step wall-clock time
+	real(wp), save :: t_local_step  = 0.0_wp ! wall-clock time in local steps
+	real(wp), save :: t_global_step = 0.0_wp ! wall-clock time in global steps
+	integer,  save :: n_local_step  = 0      ! number of local time steps
+	integer,  save :: n_global_step = 0      ! number of global time steps
+
 	! Subroutine-level (for modules >10%): mod_sour, mod_discret, mod_solve
 	real(wp), save :: t_sour_momentum  = 0.0_wp   ! source_momentum(1+2+3)
 	real(wp), save :: t_sour_pp       = 0.0_wp   ! source_pp
@@ -141,6 +153,22 @@ subroutine write_timing_report(itertot, timet_end)
 		write(lun,'(a,f12.3)') '    (mod_solve sum)     ', t_solve_enthalpy + t_solve_uvw + t_solve_cleanuvw
 		write(lun,'(a)') '--------------------------------------------'
 	endif
+	write(lun,'(a)') '============================================'
+	write(lun,'(a)') ''
+	write(lun,'(a)') '  Heating vs Cooling Stage (wall-clock)'
+	write(lun,'(a)') '--------------------------------------------'
+	write(lun,'(a,f12.3,a,i6,a,f6.2,a)') '  Heating (laser on) ', t_heating, '  s |', n_heating, ' steps |', &
+		100.0_wp * t_heating / max(t_heating + t_cooling, 1.0e-10_wp), '%'
+	write(lun,'(a,f12.3,a,i6,a,f6.2,a)') '  Cooling (laser off)', t_cooling, '  s |', n_cooling, ' steps |', &
+		100.0_wp * t_cooling / max(t_heating + t_cooling, 1.0e-10_wp), '%'
+	write(lun,'(a)') '--------------------------------------------'
+	write(lun,'(a)') ''
+	write(lun,'(a)') '  Local vs Global Step (wall-clock)'
+	write(lun,'(a)') '--------------------------------------------'
+	write(lun,'(a,f12.3,a,i6,a,f6.2,a)') '  Local  steps       ', t_local_step,  '  s |', n_local_step,  ' steps |', &
+		100.0_wp * t_local_step  / max(t_local_step + t_global_step, 1.0e-10_wp), '%'
+	write(lun,'(a,f12.3,a,i6,a,f6.2,a)') '  Global steps       ', t_global_step, '  s |', n_global_step, ' steps |', &
+		100.0_wp * t_global_step / max(t_local_step + t_global_step, 1.0e-10_wp), '%'
 	write(lun,'(a)') '============================================'
 	close(lun)
 end subroutine write_timing_report

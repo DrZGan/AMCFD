@@ -9,7 +9,7 @@ module sim_state
 	implicit none
 
 	! Derived constants (set in initialize)
-	real(wp) dgdt, deltemp, cpavg, hlcal, hlatnt, boufac
+	real(wp) dgdt, deltemp, cpavg, hlcal, boufac
 
 	! Residual scalars
 	real(wp) resorm, refmom, ahtoploss

@@ -9,3 +9,4 @@ find -name "*.tec" -exec rm -f '{}' \;
 find -name "*.vts" -exec rm -f '{}' \;
 find -name "*.vtk" -exec rm -f '{}' \;
 find -name "*.txt" -exec rm -f '{}' \;
+find -name "*.png" -exec rm -f '{}' \;

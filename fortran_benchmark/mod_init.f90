@@ -39,8 +39,9 @@ subroutine initialize
 	dgdt=dgdtp                    !temperature coefficient of surface tension
 	deltemp = tliquid - tsolid    !difference between solidus and liquidus
 	cpavg = (acpa*tsolid+acpb+acpl)*0.5        !average heat capacity
+	hsmelt = acpa*tsolid**2/2.0_wp + acpb*tsolid  !enthalpy at solidus (ensures H-T continuity)
 	hlcal = hsmelt+cpavg*deltemp  !calcu enthalpy at liquidus
-	hlatnt = hlfriz - hlcal       !calcu latent heat
+	hlfriz = hlcal + hlatnt       !total enthalpy including latent heat
 	boufac = denl*g*beta         !bouyancy factor=density/temperature rise
 
 	enthalpyPreheat = temp_to_enthalpy(tempPreheat, acpa, acpb, acpl, tsolid, tliquid, hsmelt, hlcal, deltemp)

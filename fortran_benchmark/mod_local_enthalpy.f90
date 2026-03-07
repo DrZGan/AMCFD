@@ -9,7 +9,14 @@ module local_enthalpy
 	use parameters
 	use sim_state
 	use field_data
+	use dimensions
 	implicit none
+
+	! Initial local region sizes (read from inputfile, never modified)
+	real(wp) :: local_half_x_init = 0.0_wp
+	real(wp) :: local_half_y_init = 0.0_wp
+	real(wp) :: local_depth_z_init = 0.0_wp
+	logical  :: local_init_saved = .false.
 
 	contains
 
@@ -36,6 +43,24 @@ subroutine get_enthalpy_region(step_idx, is_local, ilo, ihi, jlo, jhi, klo, khi)
 	is_local = (phase <= localnum)
 
 	if (.not. is_local) return
+
+	! Save initial values on first call
+	if (.not. local_init_saved) then
+		local_half_x_init = local_half_x
+		local_half_y_init = local_half_y
+		local_depth_z_init = local_depth_z
+		local_init_saved = .true.
+	endif
+
+	! Dynamically expand local region to cover melt pool, clamped to global domain
+	local_half_x = max(local_half_x_init, alen)
+	local_half_y = max(local_half_y_init, width)
+	local_depth_z = max(local_depth_z_init, depth)
+
+	! Clamp to global domain half-extents
+	local_half_x = min(local_half_x, 0.5_wp * (x(nim1) - x(2)))
+	local_half_y = min(local_half_y, 0.5_wp * (y(njm1) - y(2)))
+	local_depth_z = min(local_depth_z, z(nk) - z(2))
 
 	call compute_local_region(ilo, ihi, jlo, jhi, klo, khi)
 end subroutine get_enthalpy_region

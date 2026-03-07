@@ -9,19 +9,20 @@ module property
 
 	contains
 
-subroutine properties
+subroutine properties(ilo, ihi, jlo, jhi, klo, khi)
 	implicit none
+	integer, intent(in) :: ilo, ihi, jlo, jhi, klo, khi
 	integer i,j,k, jind
 	real(wp) diffs, diffl
 	real(wp) dL_mix, vMag, visT, diffT
 
-	
 
-	do k=1,nk
+
+	do k=klo,khi
 !$OMP PARALLEL PRIVATE(jind, dL_mix, vMag, visT, diffT,diffs,diffl)
 !$OMP DO
-	do j=1,nj
-	do i=1,ni
+	do j=jlo,jhi
+	do i=ilo,ihi
 
 	
 		visT=0 !dens*dL_mix*0.3*vMag

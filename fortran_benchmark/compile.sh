@@ -20,10 +20,10 @@ gfortran -fopenmp -O3 -march=native -c \
     mod_field_data.f90 \
     mod_coeff_data.f90 \
     mod_sim_state.f90 \
-    mod_local_enthalpy.f90 \
     mod_init.f90 \
     mod_laser.f90 \
     mod_dimen.f90 \
+    mod_local_enthalpy.f90 \
     mod_bound.f90 \
     mod_discret.f90 \
     mod_entot.f90 \
@@ -42,6 +42,4 @@ gfortran -fopenmp -O3 -march=native -c \
 # Link all object files
 gfortran -fopenmp -O3 -march=native *.o -o cluster_main
 
-echo "Build complete: cluster_main"
-echo ""
-echo "To run: export OMP_NUM_THREADS=12 && ./cluster_main"
+export OMP_NUM_THREADS=12 && ./cluster_main
