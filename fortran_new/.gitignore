@@ -1,8 +1,0 @@
-# Compiled objects and binaries
-*.o
-*.mod
-cluster_main
-fort.*
-
-# Result output files
-result/
