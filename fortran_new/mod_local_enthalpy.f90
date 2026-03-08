@@ -18,7 +18,72 @@ module local_enthalpy
 	real(wp) :: local_depth_z_init = 0.0_wp
 	logical  :: local_init_saved = .false.
 
+	! Skipped-timestep compensation arrays
+	integer, allocatable :: n_skipped(:,:,:)
+	real(wp), allocatable :: delt_eff(:,:,:)
+
 	contains
+
+!********************************************************************
+subroutine allocate_skipped(nni, nnj, nnk)
+	integer, intent(in) :: nni, nnj, nnk
+	if (allocated(n_skipped)) deallocate(n_skipped)
+	if (allocated(delt_eff)) deallocate(delt_eff)
+	allocate(n_skipped(nni, nnj, nnk))
+	allocate(delt_eff(nni, nnj, nnk))
+	n_skipped = 0
+	delt_eff = delt
+end subroutine allocate_skipped
+
+!********************************************************************
+subroutine compute_delt_eff()
+	integer :: i, j, k
+	!$OMP PARALLEL DO
+	do k = 1, nk
+	do j = 1, nj
+	do i = 1, ni
+		delt_eff(i,j,k) = delt * (n_skipped(i,j,k) + 1)
+	enddo
+	enddo
+	enddo
+	!$OMP END PARALLEL DO
+end subroutine compute_delt_eff
+
+!********************************************************************
+subroutine update_skipped(ilo, ihi, jlo, jhi, klo, khi, is_local)
+	integer, intent(in) :: ilo, ihi, jlo, jhi, klo, khi
+	logical, intent(in) :: is_local
+	integer :: i, j, k
+
+	if (.not. is_local) then
+		n_skipped = 0
+		return
+	endif
+
+	! Cells inside local region were just solved: reset
+	!$OMP PARALLEL DO
+	do k = klo, khi
+	do j = jlo, jhi
+	do i = ilo, ihi
+		n_skipped(i,j,k) = 0
+	enddo
+	enddo
+	enddo
+	!$OMP END PARALLEL DO
+
+	! Cells outside local region: increment
+	!$OMP PARALLEL DO PRIVATE(i,j,k)
+	do k = 2, nkm1
+	do j = 2, njm1
+	do i = 2, nim1
+		if (i < ilo .or. i > ihi .or. j < jlo .or. j > jhi .or. k < klo .or. k > khi) then
+			n_skipped(i,j,k) = n_skipped(i,j,k) + 1
+		endif
+	enddo
+	enddo
+	enddo
+	!$OMP END PARALLEL DO
+end subroutine update_skipped
 
 !********************************************************************
 subroutine get_enthalpy_region(step_idx, is_local, ilo, ihi, jlo, jhi, klo, khi)

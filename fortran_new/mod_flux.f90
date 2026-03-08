@@ -7,6 +7,7 @@ module fluxes
 	use parameters
 	use laserinput
 	use source
+	use local_enthalpy, only: delt_eff
 
 
 
@@ -73,7 +74,7 @@ subroutine heat_fluxes
 	do j=2,njm1
 	do i=2,nim1
 		dh1=enthalpy(i,j,k)-hnot(i,j,k)+(fracl(i,j,k)-fraclnot(i,j,k))*hlatnt
-		accul=accul+volume(i,j,k)*den(i,j,k)*dh1/delt
+		accul=accul+volume(i,j,k)*den(i,j,k)*dh1/delt_eff(i,j,k)
 		heatvol=heatvol+sourceinput(i,j,k)*volume(i,j,k)
 	enddo
 	enddo

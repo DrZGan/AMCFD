@@ -30,6 +30,9 @@ module parameters
 	real(wp) htci, htcj, htck1, htckn, tempWest, tempEast, tempNorth, tempBottom, tempPreheat, tempAmb	
 	integer nzx, nzy, nzz, maxit, localnum, outputintervel
 	integer ncvx(nx1),ncvy(ny1),ncvz(nz1)
+	character(len=128) :: case_name = 'default'
+	character(len=256) :: result_dir = './result/default/'
+	character(len=256) :: file_prefix = './result/default/default_'
 
 	namelist / process_parameters /alaspow, alaseta, alasrb, alasfact
 	namelist / volumetric_parameters/ alaspowvol, alasetavol, sourcerad, sourcedepth
@@ -40,15 +43,14 @@ module parameters
 	namelist / boundary_conditions / htci, htcj, htck1, htckn, tempWest, tempEast, tempNorth, &
 		tempBottom, tempPreheat, tempAmb
 	namelist / local_solver / localnum, local_half_x, local_half_y, local_depth_z
-	namelist / output_control / outputintervel
+	namelist / output_control / outputintervel, case_name
 
 	contains
 
 subroutine read_data
-	
+
 	integer i,j,k
 
-	!
 	open(unit=10,file='./inputfile/input_param.txt',form='formatted')
 	
 !-----geometrical parameters-------------------------------
@@ -90,6 +92,12 @@ subroutine read_data
 	! read output control parameters
 
 	close(10)    ! close file 10
+
+	! Build result directory and file prefix from case_name
+	result_dir = './result/' // trim(adjustl(case_name)) // '/'
+	file_prefix = trim(result_dir) // trim(adjustl(case_name)) // '_'
+	call execute_command_line('mkdir -p ' // trim(result_dir))
+
 	return
 end subroutine read_data
 end module parameters

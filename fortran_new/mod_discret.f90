@@ -9,6 +9,7 @@ module discretization
 	use parameters
 	use dimensions
 	use cfd_utils
+	use local_enthalpy, only: delt_eff
 
 	implicit none
 
@@ -357,7 +358,7 @@ subroutine discretize_enthalpy(ilo, ihi, jlo, jhi, klo, khi)
 		at(i,j,k) = tmp1+max(0.0,-ft)
 		ab(i,j,k+1) = tmp1+max(0.0,ft)
 
-		apnot(i,j,k)=den(i,j,k)/delt*volume(i,j,k)
+		apnot(i,j,k)=den(i,j,k)/delt_eff(i,j,k)*volume(i,j,k)
 
 		sp(i,j,k)=0.0
 		su(i,j,k)=apnot(i,j,k)*hnot(i,j,k)

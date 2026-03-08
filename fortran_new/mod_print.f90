@@ -42,7 +42,6 @@ end subroutine allocate_print
 !********************************************************************
 subroutine StartTime
 	call date_and_time(values = iTimeStart)     !fortran API, get system time
-	write(6,800)iTimeStart(1:3),iTimeStart(5:7)
 	write(9,800)iTimeStart(1:3),iTimeStart(5:7)
 800	format(2x,'Date: ',I4,'-',I2,'-',I2,2x,'time: ',2(I2,' :'),I2,/)
 end subroutine StartTime
@@ -72,11 +71,6 @@ subroutine outputres
 		write(9,3)timet,niter,aAveSec,itertot,resorh,resorm,resoru,resorv,resorw
 		write(9,5)tpeak,umax,vmax,wmax,alen,depth,width
 		write(9,2)flux_north,flux_south,ahtoploss,ahtoploss,flux_bottom,flux_west,flux_east,heatout,accul,heatinLaser,heatvol,ratio
-		write(6,3)timet,niter,aAveSec,itertot,resorh,resorm,resoru,resorv,resorw
-		write(6,5)tpeak,umax,vmax,wmax,alen,depth,width
-		write(6,2)flux_north,flux_south,ahtoploss,ahtoploss,flux_bottom,flux_west,flux_east,heatout,accul,heatinLaser,heatvol,ratio
-		write(6,7)100.0_wp*timet/timax,coordhistory(1,2),coordhistory(1,3),coordhistory(1,4), &
-		coordhistory(1,5),coordhistory(1,6),coordhistory(1,7),coordhistory(1,8)
 		write(9,7)100.0_wp*timet/timax,coordhistory(1,2),coordhistory(1,3),coordhistory(1,4), &
 			coordhistory(1,5),coordhistory(1,6),coordhistory(1,7),coordhistory(1,8)
 3		format('  time  iter  time/iter  tot_iter  res_enth  res_mass     res_u   res_v   res_w',/, &
@@ -108,7 +102,7 @@ subroutine Cust_Out
 	outputnum=INT(timet/delt)/outputintervel
 	write( cTemp,'(i3)' ) outputnum
 	! Open file for ASCII header
-	open(unit=41,file='./result/vtkmov' //trim(adjustl( cTemp ))// '.vtk')
+	open(unit=41,file=trim(file_prefix)//'vtkmov' //trim(adjustl( cTemp ))// '.vtk')
 
 
 	gridx=0
@@ -141,7 +135,7 @@ subroutine Cust_Out
 	close(41)
 	
 	! Reopen for binary append to write coordinates
-	open(unit=41,file='./result/vtkmov' //trim(adjustl( cTemp ))// '.vtk', &
+	open(unit=41,file=trim(file_prefix)//'vtkmov' //trim(adjustl( cTemp ))// '.vtk', &
 	     access='stream', form='unformatted', position='append', convert='big_endian')
 	
 	! Write point coordinates in binary
@@ -160,13 +154,13 @@ subroutine Cust_Out
 	
 	! Write POINT_DATA header (need to reopen as formatted to write ASCII)
 	close(41)
-	open(unit=41,file='./result/vtkmov' //trim(adjustl( cTemp ))// '.vtk', &
+	open(unit=41,file=trim(file_prefix)//'vtkmov' //trim(adjustl( cTemp ))// '.vtk', &
 	     position='append')
 	write(41,'(A,I0)') 'POINT_DATA ', npts
 	close(41)
 	
 	! Reopen for binary append for field data
-	open(unit=41,file='./result/vtkmov' //trim(adjustl( cTemp ))// '.vtk', &
+	open(unit=41,file=trim(file_prefix)//'vtkmov' //trim(adjustl( cTemp ))// '.vtk', &
 	     access='stream', form='unformatted', position='append', convert='big_endian')
 
 
@@ -307,7 +301,6 @@ end subroutine CalTime
 !********************************************************************
 subroutine EndTime
 	call date_and_time(values = iTimeEnd)
-	write(6,807)iTimeEnd(1:3),iTimeEnd(5:7)
 	write(9,807)iTimeEnd(1:3),iTimeEnd(5:7)
 807	format(2x,'Date: ',I4,'-',I2,'-',I2,2x,'time: ',2(I2,':'),I2,/)
 	if(iTimeEnd(7).lt.iTimeStart(7)) then
@@ -319,7 +312,6 @@ subroutine EndTime
 		iTimeEnd(5)=iTimeEnd(5)-1
 	endif
 	if(iTimeEnd(5).lt.iTimeStart(5))	 iTimeEnd(5)=iTimeEnd(5)+24
-	write(6,808)(iTimeEnd(5)-iTimeStart(5)),(iTimeEnd(6)-iTimeStart(6)),(iTimeEnd(7)-iTimeStart(7))
 	write(9,808)(iTimeEnd(5)-iTimeStart(5)),(iTimeEnd(6)-iTimeStart(6)),(iTimeEnd(7)-iTimeStart(7))
 808	format(2x,'Total time used:',I6,2x,'hr',I6,2x,'m',I6,2x,'s',/)
 
@@ -336,7 +328,7 @@ end subroutine EndTime
 subroutine OpenFiles
 
 	
-	open(unit=9,file='./result/output.txt')
+	open(unit=9,file=trim(file_prefix)//'output.txt')
 
 
 	write(41,*)'TITLE = "Thermo-Capillary Flow in Laser-Generated Melt Pool"'
@@ -392,7 +384,7 @@ subroutine init_thermal_history
 	enddo
 
 	! Write file header
-	open(unit=47, file='./result/thermal_history.txt', status='replace')
+	open(unit=47, file=trim(file_prefix)//'thermal_history.txt', status='replace')
 	write(47,'(a)') '# Thermal History - 10 Monitoring Points'
 	write(47,'(a)') '# Columns: time(s)  T1..T10 (K)'
 	write(47,'(a)') '# Point coordinates (nearest cell centres):'
@@ -415,7 +407,7 @@ subroutine write_thermal_history(t)
 	real(wp), intent(in) :: t
 	integer :: p
 	if (.not. thist_init) return
-	open(unit=47, file='./result/thermal_history.txt', status='old', position='append')
+	open(unit=47, file=trim(file_prefix)//'thermal_history.txt', status='old', position='append')
 	write(47,'(es12.5)', advance='no') t
 	do p = 1, n_thist
 		write(47,'(2x,f10.3)', advance='no') temp(thist_i(p), thist_j(p), thist_k(p))
@@ -431,13 +423,13 @@ subroutine finalize_thermal_history
 	if (.not. thist_init) return
 
 	! Write Python plotting script
-	open(unit=lun, file='./result/plot_thermal_history.py', status='replace')
+	open(unit=lun, file=trim(file_prefix)//'plot_thermal_history.py', status='replace')
 	write(lun,'(a)') 'import numpy as np'
 	write(lun,'(a)') 'import matplotlib'
 	write(lun,'(a)') 'matplotlib.use("Agg")'
 	write(lun,'(a)') 'import matplotlib.pyplot as plt'
 	write(lun,'(a)') ''
-	write(lun,'(a)') 'data = np.loadtxt("thermal_history.txt", comments="#")'
+	write(lun,'(a)') 'data = np.loadtxt("'//trim(adjustl(case_name))//'_thermal_history.txt", comments="#")'
 	write(lun,'(a)') 'if data.ndim == 1: data = data[np.newaxis, :]'
 	write(lun,'(a)') 't = data[:, 0] * 1e3  # ms'
 	write(lun,'(a)') 'labels = ['
@@ -463,12 +455,14 @@ subroutine finalize_thermal_history
 	write(lun,'(a)') 'ax.legend(fontsize=7, loc="upper right")'
 	write(lun,'(a)') 'ax.grid(True, alpha=0.3)'
 	write(lun,'(a)') 'plt.tight_layout()'
-	write(lun,'(a)') 'plt.savefig("thermal_history.png", dpi=150)'
-	write(lun,'(a)') 'print("Saved thermal_history.png")'
+	write(lun,'(a)') 'plt.savefig("'//trim(adjustl(case_name))//'_thermal_history.png", dpi=150)'
+	write(lun,'(a)') 'print("Saved '//trim(adjustl(case_name))//'_thermal_history.png")'
 	close(lun)
 
 	! Run Python script
-	call execute_command_line('cd result && python3 plot_thermal_history.py', wait=.true.)
+	call execute_command_line('cd '//trim(result_dir)// &
+		' && python3 '//trim(adjustl(case_name))// &
+		'_plot_thermal_history.py', wait=.true.)
 end subroutine finalize_thermal_history
 
 end module printing

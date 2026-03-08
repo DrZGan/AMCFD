@@ -40,6 +40,7 @@ program main
 	real(wp) amaxres
 	real(wp) t0, t1
 	real(wp) t_step_wall
+	real(wp) wall_start, wall_elapsed
 
 	call read_data
 	call read_toolpath
@@ -48,11 +49,13 @@ program main
 	call allocate_source(ni, nj, nk)
 	call allocate_print(ni, nj, nk)
 	call allocate_laser(ni, nj)
+	call allocate_skipped(ni, nj, nk)
 	call OpenFiles
 	call initialize
 	call init_thermal_history
 
 	call StartTime
+	wall_start = omp_get_wtime()
 
 	itertot=0
 	step_idx=0
@@ -71,21 +74,18 @@ program main
 		call read_coordinates
 !		call calcRHF   ! RHF disabled
 		call get_enthalpy_region(step_idx, is_local, ilo, ihi, jlo, jhi, klo, khi)
-		if (toolmatrix(PathNum,5) .lt. laser_on_threshold) then
-			is_local = .false.
-			ilo = 2; ihi = nim1
-			jlo = 2; jhi = njm1
-			klo = 2; khi = nkm1
-		endif
 		call update_localfield(ilo, ihi, jlo, jhi, klo, khi)
 		call cpu_time(t1)
 		t_laser = t_laser + (t1 - t0)
 
+		call cpu_time(t0)
+		call compute_delt_eff()
+		call cpu_time(t1)
+		t_skipped_mgmt = t_skipped_mgmt + (t1 - t0)
+
 		if (is_local) then
-			write(*,'(A,I6,A)')  '  Step', step_idx, ' => LOCAL enthalpy solve'
 			write(9,'(A,I6,A)') '  Step', step_idx, ' => LOCAL enthalpy solve'
 		else
-			write(*,'(A,I6,A)')  '  Step', step_idx, ' => GLOBAL enthalpy solve'
 			write(9,'(A,I6,A)') '  Step', step_idx, ' => GLOBAL enthalpy solve'
 		endif
 
@@ -277,6 +277,11 @@ program main
 		end do iter_loop
 
 		call cpu_time(t0)
+		call update_skipped(ilo, ihi, jlo, jhi, klo, khi, is_local)
+		call cpu_time(t1)
+		t_skipped_mgmt = t_skipped_mgmt + (t1 - t0)
+
+		call cpu_time(t0)
 		call CalTime
 		call outputres
 		call cpu_time(t1)
@@ -300,23 +305,72 @@ program main
 		endif
 
 		call cpu_time(t0)
-		do k=1,nk
-		do j=1,nj
-		do i=1,ni
-			if(temp(i,j,k).le.tsolid) then
-				uVel(i,j,k)=0.0
-				vVel(i,j,k)=0.0
-				wVel(i,j,k)=0.0
-			endif
-			unot(i,j,k)=uVel(i,j,k)
-			vnot(i,j,k)=vVel(i,j,k)
-			wnot(i,j,k)=wVel(i,j,k)
-			tnot(i,j,k)=temp(i,j,k)
-			hnot(i,j,k)=enthalpy(i,j,k)
-			fraclnot(i,j,k)=fracl(i,j,k)
-		enddo
-		enddo
-		enddo
+		if (is_local) then
+			! Local step: velocity update for all cells
+			!$OMP PARALLEL DO PRIVATE(i,j,k)
+			do k=1,nk
+			do j=1,nj
+			do i=1,ni
+				if(temp(i,j,k).le.tsolid) then
+					uVel(i,j,k)=0.0
+					vVel(i,j,k)=0.0
+					wVel(i,j,k)=0.0
+				endif
+				unot(i,j,k)=uVel(i,j,k)
+				vnot(i,j,k)=vVel(i,j,k)
+				wnot(i,j,k)=wVel(i,j,k)
+			enddo
+			enddo
+			enddo
+			!$OMP END PARALLEL DO
+			! Only update hnot/tnot/fraclnot for cells inside the local region
+			!$OMP PARALLEL DO PRIVATE(i,j,k)
+			do k=klo,khi
+			do j=jlo,jhi
+			do i=ilo,ihi
+				tnot(i,j,k)=temp(i,j,k)
+				hnot(i,j,k)=enthalpy(i,j,k)
+				fraclnot(i,j,k)=fracl(i,j,k)
+			enddo
+			enddo
+			enddo
+			!$OMP END PARALLEL DO
+			! Restore enthalpy/temp/fracl outside local region from hnot
+			!$OMP PARALLEL DO PRIVATE(i,j,k)
+			do k=1,nk
+			do j=1,nj
+			do i=1,ni
+				if (i < ilo .or. i > ihi .or. j < jlo .or. j > jhi .or. k < klo .or. k > khi) then
+					enthalpy(i,j,k)=hnot(i,j,k)
+					temp(i,j,k)=tnot(i,j,k)
+					fracl(i,j,k)=fraclnot(i,j,k)
+				endif
+			enddo
+			enddo
+			enddo
+			!$OMP END PARALLEL DO
+		else
+			! Global step: update all cells
+			!$OMP PARALLEL DO PRIVATE(i,j,k)
+			do k=1,nk
+			do j=1,nj
+			do i=1,ni
+				if(temp(i,j,k).le.tsolid) then
+					uVel(i,j,k)=0.0
+					vVel(i,j,k)=0.0
+					wVel(i,j,k)=0.0
+				endif
+				unot(i,j,k)=uVel(i,j,k)
+				vnot(i,j,k)=vVel(i,j,k)
+				wnot(i,j,k)=wVel(i,j,k)
+				tnot(i,j,k)=temp(i,j,k)
+				hnot(i,j,k)=enthalpy(i,j,k)
+				fraclnot(i,j,k)=fracl(i,j,k)
+			enddo
+			enddo
+			enddo
+			!$OMP END PARALLEL DO
+		endif
 		call Cust_Out
 		call write_thermal_history(timet)
 		call cpu_time(t1)
@@ -326,7 +380,8 @@ program main
 
 	call EndTime
 	call finalize_thermal_history
+	wall_elapsed = omp_get_wtime() - wall_start
 
-	call write_timing_report(itertot, timet)
+	call write_timing_report(itertot, timet, wall_elapsed, file_prefix)
 	stop
 	end

@@ -1,0 +1,65 @@
+============================================
+  AM-CFD Module Timing Report
+  (CPU time accumulated in main loop)
+============================================
+  Total iterations (itertot): 11247
+  Simulation time reached:    1.000104E-02
+  Total CPU time:    11096.975 s
+  Total wall time:     2061.977 s
+  Total time used:     0  hr    34  m    21  s
+--------------------------------------------
+  Module              |   Time(s)   |   Ratio(%)
+--------------------------------------------
+           mod_discret|    2776.441  |   25.02%
+              mod_sour|    2605.977  |   23.48%
+             mod_solve|    2034.458  |   18.33%
+          mod_converge|     882.811  |    7.96%
+             mod_resid|     769.408  |    6.93%
+              mod_flux|     483.527  |    4.36%
+              mod_prop|     474.548  |    4.28%
+             mod_dimen|     431.964  |    3.89%
+             mod_entot|     323.118  |    2.91%
+     other (copy/misc)|     172.095  |    1.55%
+             mod_bound|      92.256  |    0.83%
+        laser/toolpath|      25.789  |    0.23%
+     skipped-step mgmt|      17.093  |    0.15%
+            mod_revise|       6.203  |    0.06%
+             mod_print|       1.285  |    0.01%
+--------------------------------------------
+  Sum (check):            11096.975
+============================================
+
+  Subroutine breakdown (modules with ratio >10%)
+  Time(s) = CPU time; Ratio(%) = within module; Glob%(%) = of total
+--------------------------------------------
+  mod_sour:
+    source_momentum           48.455  |    1.86% mod |  0.44% glob
+    source_pp                  3.353  |    0.13% mod |  0.03% glob
+    source_enthalpy         2554.169  |   98.01% mod | 23.02% glob
+    (mod_sour sum)          2605.977
+--------------------------------------------
+  mod_discret:
+    discretize_enthalpy     2698.981  |   97.21% mod | 24.32% glob
+    discretize_momentum       71.790  |    2.59% mod |  0.65% glob
+    discretize_pp              5.670  |    0.20% mod |  0.05% glob
+    (mod_discret sum)       2776.441
+--------------------------------------------
+  mod_solve:
+    solution_enthalpy       1992.845  |   97.95% mod | 17.96% glob
+    solution_uvw (4x)         32.882  |    1.62% mod |  0.30% glob
+    cleanuvw                   8.731  |    0.43% mod |  0.08% glob
+    (mod_solve sum)         2034.458
+--------------------------------------------
+============================================
+
+  Heating vs Cooling Stage (wall-clock)
+--------------------------------------------
+  Heating (laser on)     1588.292  s |   425 steps | 85.15%
+  Cooling (laser off)     277.053  s |    75 steps | 14.85%
+--------------------------------------------
+
+  Local vs Global Step (wall-clock)
+--------------------------------------------
+  Local  steps              0.000  s |     0 steps |  0.00%
+  Global steps           1865.346  s |   500 steps |100.00%
+============================================

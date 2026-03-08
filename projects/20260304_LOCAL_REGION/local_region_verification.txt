@@ -1,0 +1,170 @@
+==========================================================================================
+  LOCAL_REGION Verification Report
+  Comparing localnum=0 (baseline) vs localnum=3
+==========================================================================================
+
+Point  | MaxAbsDiff(K) | MaxRelDiff(%) | RelRMSD(%) | PeakTDiff(K)
+------------------------------------------------------------------------
+P1     |        33.277 |        1.2038 |     0.6932 |       21.804
+P2     |        84.080 |        3.1213 |     0.8931 |       62.625
+P3     |        47.303 |        1.7162 |     0.3174 |       47.303
+P4     |        79.263 |        3.2585 |     0.7518 |       78.152
+P5     |        53.396 |        2.7828 |     0.9887 |       53.396
+P6     |        41.223 |        1.4543 |     0.6772 |       41.223
+P7     |        91.185 |        6.1546 |     1.2303 |        2.063
+P8     |         0.757 |        0.2390 |     0.0945 |        0.745
+P9     |         0.176 |        0.0600 |     0.0415 |        0.159
+P10    |         0.170 |        0.0576 |     0.0158 |        0.094
+------------------------------------------------------------------------
+
+Acceptance criteria:
+  Max relative difference (max|dT|/T_peak): 6.1546% (threshold < 5%)  => FAIL
+  Max relative RMSD (rms(dT/T_base)):       1.2303% (threshold < 3%)  => PASS
+  Overall result: FAIL
+
+==========================================================================================
+  Timing Comparison
+==========================================================================================
+  Baseline (localnum=0) total CPU time:  5778.009 s
+  Local    (localnum=3) total CPU time:  4420.562 s
+  CPU speedup ratio: 1.31x
+  Baseline (localnum=0) total wall time: 560.161 s
+  Local    (localnum=3) total wall time: 456.582 s
+  Wall speedup ratio: 1.23x
+
+==========================================================================================
+
+--- Baseline (localnum=0) timing_report.txt ---
+============================================
+  AM-CFD Module Timing Report
+  (CPU time accumulated in main loop)
+============================================
+  Total iterations (itertot): 4856
+  Simulation time reached:    5.001002E-03
+  Total CPU time:     5778.009 s
+  Total wall time:      560.161 s
+  Total time used:     0  hr     9  m    20  s
+--------------------------------------------
+  Module              |   Time(s)   |   Ratio(%)
+--------------------------------------------
+              mod_sour|    1501.571  |   25.99%
+           mod_discret|    1371.539  |   23.74%
+             mod_solve|     935.905  |   16.20%
+          mod_converge|     392.983  |    6.80%
+             mod_resid|     375.893  |    6.51%
+             mod_dimen|     339.642  |    5.88%
+              mod_prop|     252.961  |    4.38%
+              mod_flux|     218.696  |    3.78%
+             mod_entot|     179.702  |    3.11%
+     other (copy/misc)|     105.888  |    1.83%
+             mod_bound|      46.258  |    0.80%
+        laser/toolpath|      35.973  |    0.62%
+     skipped-step mgmt|      10.557  |    0.18%
+            mod_revise|       9.232  |    0.16%
+             mod_print|       1.208  |    0.02%
+--------------------------------------------
+  Sum (check):             5778.009
+============================================
+
+  Subroutine breakdown (modules with ratio >10%)
+  Time(s) = CPU time; Ratio(%) = within module; Glob%(%) = of total
+--------------------------------------------
+  mod_sour:
+    source_momentum           42.399  |    2.82% mod |  0.73% glob
+    source_pp                  4.292  |    0.29% mod |  0.07% glob
+    source_enthalpy         1454.879  |   96.89% mod | 25.18% glob
+    (mod_sour sum)          1501.571
+--------------------------------------------
+  mod_discret:
+    discretize_enthalpy     1315.169  |   95.89% mod | 22.76% glob
+    discretize_momentum       50.918  |    3.71% mod |  0.88% glob
+    discretize_pp              5.452  |    0.40% mod |  0.09% glob
+    (mod_discret sum)       1371.539
+--------------------------------------------
+  mod_solve:
+    solution_enthalpy        895.751  |   95.71% mod | 15.50% glob
+    solution_uvw (4x)         35.761  |    3.82% mod |  0.62% glob
+    cleanuvw                   4.392  |    0.47% mod |  0.08% glob
+    (mod_solve sum)          935.905
+--------------------------------------------
+============================================
+
+  Heating vs Cooling Stage (wall-clock)
+--------------------------------------------
+  Heating (laser on)      432.332  s |   225 steps | 88.93%
+  Cooling (laser off)      53.800  s |    25 steps | 11.07%
+--------------------------------------------
+
+  Local vs Global Step (wall-clock)
+--------------------------------------------
+  Local  steps              0.000  s |     0 steps |  0.00%
+  Global steps            486.132  s |   250 steps |100.00%
+============================================
+
+
+--- Local (localnum=3) timing_report.txt ---
+============================================
+  AM-CFD Module Timing Report
+  (CPU time accumulated in main loop)
+============================================
+  Total iterations (itertot): 6623
+  Simulation time reached:    5.001002E-03
+  Total CPU time:     4420.562 s
+  Total wall time:      456.582 s
+  Total time used:     0  hr     7  m    36  s
+--------------------------------------------
+  Module              |   Time(s)   |   Ratio(%)
+--------------------------------------------
+              mod_sour|    1064.272  |   24.08%
+           mod_discret|    1000.083  |   22.62%
+             mod_solve|     675.238  |   15.27%
+             mod_dimen|     465.790  |   10.54%
+          mod_converge|     296.557  |    6.71%
+             mod_resid|     272.959  |    6.17%
+              mod_prop|     176.356  |    3.99%
+              mod_flux|     140.700  |    3.18%
+             mod_entot|     127.162  |    2.88%
+     other (copy/misc)|     111.404  |    2.52%
+        laser/toolpath|      34.856  |    0.79%
+             mod_bound|      32.894  |    0.74%
+            mod_revise|      12.801  |    0.29%
+     skipped-step mgmt|       8.250  |    0.19%
+             mod_print|       1.242  |    0.03%
+--------------------------------------------
+  Sum (check):             4420.562
+============================================
+
+  Subroutine breakdown (modules with ratio >10%)
+  Time(s) = CPU time; Ratio(%) = within module; Glob%(%) = of total
+--------------------------------------------
+  mod_sour:
+    source_momentum           59.791  |    5.62% mod |  1.35% glob
+    source_pp                  5.674  |    0.53% mod |  0.13% glob
+    source_enthalpy          998.807  |   93.85% mod | 22.59% glob
+    (mod_sour sum)          1064.272
+--------------------------------------------
+  mod_discret:
+    discretize_enthalpy      923.313  |   92.32% mod | 20.89% glob
+    discretize_momentum       69.121  |    6.91% mod |  1.56% glob
+    discretize_pp              7.649  |    0.76% mod |  0.17% glob
+    (mod_discret sum)       1000.083
+--------------------------------------------
+  mod_solve:
+    solution_enthalpy        621.900  |   92.10% mod | 14.07% glob
+    solution_uvw (4x)         47.810  |    7.08% mod |  1.08% glob
+    cleanuvw                   5.527  |    0.82% mod |  0.13% glob
+    (mod_solve sum)          675.238
+--------------------------------------------
+============================================
+
+  Heating vs Cooling Stage (wall-clock)
+--------------------------------------------
+  Heating (laser on)      323.241  s |   225 steps | 85.45%
+  Cooling (laser off)      55.038  s |    25 steps | 14.55%
+--------------------------------------------
+
+  Local vs Global Step (wall-clock)
+--------------------------------------------
+  Local  steps             65.341  s |   169 steps | 17.27%
+  Global steps            312.938  s |    81 steps | 82.73%
+============================================

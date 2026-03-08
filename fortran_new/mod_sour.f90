@@ -10,6 +10,7 @@ module source
 	use dimensions
 	use boundary
 	use cfd_utils
+	use local_enthalpy, only: delt_eff
 	implicit none
 
 	real(wp), allocatable :: sourceinput(:,:,:)
@@ -185,7 +186,7 @@ subroutine source_enthalpy(ilo, ihi, jlo, jhi, klo, khi)
 			sourceinput(i,j,k)=0.0_wp
 		endif
 		su(i,j,k)=su(i,j,k)+volume(i,j,k)*sourceinput(i,j,k)
-		volht=volume(i,j,k)*hlatnt*den(i,j,k)/delt
+		volht=volume(i,j,k)*hlatnt*den(i,j,k)/delt_eff(i,j,k)
 		su(i,j,k)=su(i,j,k)-volht*(fracl(i,j,k)-fraclnot(i,j,k))
 		flew=areajk(j,k)*(max(uVel(i,j,k),0.0_wp)*fracl(i-1,j,k)-max(-uVel(i,j,k),0.0_wp)*fracl(i,j,k) &
 			+max(-uVel(i+1,j,k),0.0_wp)*fracl(i+1,j,k)-max(uVel(i+1,j,k),0.0_wp)*fracl(i,j,k))

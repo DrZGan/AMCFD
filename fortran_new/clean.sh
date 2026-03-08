@@ -5,8 +5,4 @@ find -name "*.log" -exec rm -f '{}' \;
 find -name "cluster_main*" -exec rm -f '{}' \;
 
 cd result
-find -name "*.tec" -exec rm -f '{}' \;
-find -name "*.vts" -exec rm -f '{}' \;
-find -name "*.vtk" -exec rm -f '{}' \;
-find -name "*.txt" -exec rm -f '{}' \;
-find -name "*.png" -exec rm -f '{}' \;
+find -mindepth 1 -maxdepth 1 -type d -exec rm -rf '{}' \;

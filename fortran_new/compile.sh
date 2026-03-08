@@ -1,16 +1,11 @@
 #!/bin/bash
-# AM-CFD Build Script
-# Compiles the Fortran CFD code with OpenMP parallelization
+# AM-CFD Build Script — compile only
+set -e
 
-set -e  # Exit on error
-
-# Full clean (clean.sh)
 bash clean.sh
 
 echo "Compiling AM-CFD..."
 
-# Compile all modules and main program
-# Order matters: dependencies must be compiled first
 gfortran -fopenmp -O3 -march=native -c \
     mod_precision.f90 \
     mod_const.f90 \
@@ -39,7 +34,11 @@ gfortran -fopenmp -O3 -march=native -c \
     mod_timing.f90 \
     main.f90
 
-# Link all object files
 gfortran -fopenmp -O3 -march=native *.o -o cluster_main
 
-export OMP_NUM_THREADS=12 && ./cluster_main
+echo "Build complete: cluster_main"
+echo ""
+echo "Usage: bash run.sh <case_name> [omp_threads] &"
+echo "  Example: bash run.sh baseline 4 &"
+echo "  Stop all:  kill \$(pgrep -f cluster_main)"
+echo "  Stop one:  ps aux | grep cluster_main  then  kill <PID>"

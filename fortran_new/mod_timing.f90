@@ -20,6 +20,7 @@ module timing
 	real(wp), save :: t_print   = 0.0_wp   ! mod_print (CalTime, outputres, Cust_Out)
 	real(wp), save :: t_laser   = 0.0_wp   ! laser/toolpath (laser_beam, read_coordinates, calcRHF)
 	real(wp), save :: t_other   = 0.0_wp   ! copy loop and misc
+	real(wp), save :: t_skipped_mgmt = 0.0_wp  ! skipped-step management
 
 	! Heating / cooling stage wall-clock time
 	real(wp), save :: t_heating   = 0.0_wp   ! wall-clock time in laser-on steps
@@ -46,10 +47,13 @@ module timing
 
 	contains
 
-subroutine write_timing_report(itertot, timet_end)
+subroutine write_timing_report(itertot, timet_end, wall_elapsed, file_prefix)
 	integer, intent(in) :: itertot
 	real(wp), intent(in) :: timet_end
-	integer, parameter :: lun = 88, nmod = 14
+	real(wp), intent(in) :: wall_elapsed
+	character(len=*), intent(in) :: file_prefix
+	integer, parameter :: lun = 88, nmod = 15
+	integer :: ihr, imin, isec
 	real(wp) :: t_total, t_sum
 	real(wp) :: pct, pct_glob
 	real(wp) :: t_list(nmod)
@@ -57,7 +61,7 @@ subroutine write_timing_report(itertot, timet_end)
 	integer :: idx(nmod), i, j, itmp
 
 	t_total = t_prop + t_bound + t_discret + t_sour + t_resid + t_converge + &
-	          t_solve + t_entot + t_dimen + t_flux + t_revise + t_print + t_laser + t_other
+	          t_solve + t_entot + t_dimen + t_flux + t_revise + t_print + t_laser + t_skipped_mgmt + t_other
 	if (t_total <= 0.0_wp) t_total = 1.0_wp
 
 	t_list(1) = t_prop;    name_list(1) = 'mod_prop'
@@ -73,7 +77,8 @@ subroutine write_timing_report(itertot, timet_end)
 	t_list(11) = t_revise; name_list(11) = 'mod_revise'
 	t_list(12) = t_print;  name_list(12) = 'mod_print'
 	t_list(13) = t_laser;  name_list(13) = 'laser/toolpath'
-	t_list(14) = t_other;  name_list(14) = 'other (copy/misc)'
+	t_list(14) = t_skipped_mgmt; name_list(14) = 'skipped-step mgmt'
+	t_list(15) = t_other;  name_list(15) = 'other (copy/misc)'
 	do i = 1, nmod
 		idx(i) = i
 	enddo
@@ -86,7 +91,7 @@ subroutine write_timing_report(itertot, timet_end)
 		enddo
 	enddo
 
-	open(unit=lun, file='result/timing_report.txt', action='write', status='replace')
+	open(unit=lun, file=trim(file_prefix)//'timing_report.txt', action='write', status='replace')
 	write(lun,'(a)') '============================================'
 	write(lun,'(a)') '  AM-CFD Module Timing Report'
 	write(lun,'(a)') '  (CPU time accumulated in main loop)'
@@ -94,6 +99,11 @@ subroutine write_timing_report(itertot, timet_end)
 	write(lun,'(a,i0)') '  Total iterations (itertot): ', itertot
 	write(lun,'(a,es15.6)') '  Simulation time reached: ', timet_end
 	write(lun,'(a,f12.3,a)') '  Total CPU time: ', t_total, ' s'
+	ihr  = int(wall_elapsed) / 3600
+	imin = mod(int(wall_elapsed), 3600) / 60
+	isec = mod(int(wall_elapsed), 60)
+	write(lun,'(a,f12.3,a)') '  Total wall time: ', wall_elapsed, ' s'
+	write(lun,'(a,i6,a,i6,a,i6,a)') '  Total time used:', ihr, '  hr', imin, '  m', isec, '  s'
 	write(lun,'(a)') '--------------------------------------------'
 	write(lun,'(a)') '  Module              |   Time(s)   |   Ratio(%)'
 	write(lun,'(a)') '--------------------------------------------'
@@ -104,7 +114,7 @@ subroutine write_timing_report(itertot, timet_end)
 	enddo
 	write(lun,'(a)') '--------------------------------------------'
 	t_sum = t_prop + t_bound + t_discret + t_sour + t_resid + t_converge + &
-	        t_solve + t_entot + t_dimen + t_flux + t_revise + t_print + t_laser + t_other
+	        t_solve + t_entot + t_dimen + t_flux + t_revise + t_print + t_laser + t_skipped_mgmt + t_other
 	write(lun,'(a,f12.3)') '  Sum (check):         ', t_sum
 	write(lun,'(a)') '============================================'
 	write(lun,'(a)') ''
