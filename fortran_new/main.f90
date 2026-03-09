@@ -31,6 +31,7 @@ program main
 	use timing
 	use omp_lib
 	use local_enthalpy
+	use defect_field
 
 	implicit none
 	integer i,j,k
@@ -50,6 +51,7 @@ program main
 	call allocate_print(ni, nj, nk)
 	call allocate_laser(ni, nj)
 	call allocate_skipped(ni, nj, nk)
+	call allocate_defect(ni, nj, nk)
 	call OpenFiles
 	call initialize
 	call init_thermal_history
@@ -290,6 +292,11 @@ program main
 		t_skipped_mgmt = t_skipped_mgmt + (t1 - t0)
 
 		call cpu_time(t0)
+		call update_max_temp()
+		call cpu_time(t1)
+		t_defect = t_defect + (t1 - t0)
+
+		call cpu_time(t0)
 		call CalTime
 		call outputres
 		call cpu_time(t1)
@@ -386,8 +393,13 @@ program main
 
 	end do time_loop
 
+	! Post-simulation defect analysis (before EndTime closes output file)
+	call compute_defect_determ()
+	call write_defect_report()
+
 	call EndTime
 	call finalize_thermal_history
+
 	wall_elapsed = omp_get_wtime() - wall_start
 
 	call write_timing_report(itertot, timet, wall_elapsed, file_prefix)

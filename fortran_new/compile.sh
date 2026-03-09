@@ -32,6 +32,7 @@ gfortran -fopenmp -O3 -march=native -c \
     mod_converge.f90 \
     mod_toolpath.f90 \
     mod_timing.f90 \
+    mod_defect.f90 \
     main.f90
 
 gfortran -fopenmp -O3 -march=native *.o -o cluster_main

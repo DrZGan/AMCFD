@@ -21,6 +21,7 @@ module timing
 	real(wp), save :: t_laser   = 0.0_wp   ! laser/toolpath (laser_beam, read_coordinates, calcRHF)
 	real(wp), save :: t_other   = 0.0_wp   ! copy loop and misc
 	real(wp), save :: t_skipped_mgmt = 0.0_wp  ! skipped-step management
+	real(wp), save :: t_defect   = 0.0_wp   ! defect max_temp update
 
 	! Heating / cooling stage wall-clock time
 	real(wp), save :: t_heating   = 0.0_wp   ! wall-clock time in laser-on steps
@@ -52,7 +53,7 @@ subroutine write_timing_report(itertot, timet_end, wall_elapsed, file_prefix)
 	real(wp), intent(in) :: timet_end
 	real(wp), intent(in) :: wall_elapsed
 	character(len=*), intent(in) :: file_prefix
-	integer, parameter :: lun = 88, nmod = 15
+	integer, parameter :: lun = 88, nmod = 16
 	integer :: ihr, imin, isec
 	real(wp) :: t_total, t_sum
 	real(wp) :: pct, pct_glob
@@ -61,7 +62,7 @@ subroutine write_timing_report(itertot, timet_end, wall_elapsed, file_prefix)
 	integer :: idx(nmod), i, j, itmp
 
 	t_total = t_prop + t_bound + t_discret + t_sour + t_resid + t_converge + &
-	          t_solve + t_entot + t_dimen + t_flux + t_revise + t_print + t_laser + t_skipped_mgmt + t_other
+	          t_solve + t_entot + t_dimen + t_flux + t_revise + t_print + t_laser + t_skipped_mgmt + t_defect + t_other
 	if (t_total <= 0.0_wp) t_total = 1.0_wp
 
 	t_list(1) = t_prop;    name_list(1) = 'mod_prop'
@@ -78,7 +79,8 @@ subroutine write_timing_report(itertot, timet_end, wall_elapsed, file_prefix)
 	t_list(12) = t_print;  name_list(12) = 'mod_print'
 	t_list(13) = t_laser;  name_list(13) = 'laser/toolpath'
 	t_list(14) = t_skipped_mgmt; name_list(14) = 'skipped-step mgmt'
-	t_list(15) = t_other;  name_list(15) = 'other (copy/misc)'
+	t_list(15) = t_defect; name_list(15) = 'defect (max_temp)'
+	t_list(16) = t_other;  name_list(16) = 'other (copy/misc)'
 	do i = 1, nmod
 		idx(i) = i
 	enddo
@@ -114,7 +116,7 @@ subroutine write_timing_report(itertot, timet_end, wall_elapsed, file_prefix)
 	enddo
 	write(lun,'(a)') '--------------------------------------------'
 	t_sum = t_prop + t_bound + t_discret + t_sour + t_resid + t_converge + &
-	        t_solve + t_entot + t_dimen + t_flux + t_revise + t_print + t_laser + t_skipped_mgmt + t_other
+	        t_solve + t_entot + t_dimen + t_flux + t_revise + t_print + t_laser + t_skipped_mgmt + t_defect + t_other
 	write(lun,'(a,f12.3)') '  Sum (check):         ', t_sum
 	write(lun,'(a)') '============================================'
 	write(lun,'(a)') ''
